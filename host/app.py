@@ -3,8 +3,12 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
 
+# Get the directory where app.py is located
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, 'pbl202-24.db')
+
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pbl202-24.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -93,14 +97,9 @@ def submit_credentials():
     db.session.commit()
     return jsonify({'message': 'Credentials submitted'}), 200
 
-# Initialize DB
-@app.before_first_request
-def create_tables():
-    db.create_all()
-
+# Entry point
 if __name__ == '__main__':
-    if not os.path.exists('pbl202-24.db'):
+    if not os.path.exists(DB_PATH):
         with app.app_context():
             db.create_all()
     app.run(debug=True)
-
