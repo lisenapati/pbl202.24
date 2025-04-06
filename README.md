@@ -9,8 +9,4 @@
 - Christin Agatha Purba		    (4332401030)
 - Bintang Fajar Ahza Trawijaya	(4332401031)
 
-On your python environment, run:
-```python
-pip install -r requirements.txt
-```
-
+> ⚠️ This project is intended **only for educational and controlled research environments**.
