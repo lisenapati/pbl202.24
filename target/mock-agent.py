@@ -2,45 +2,86 @@ import requests
 import random
 import time
 import uuid
+from datetime import datetime, timedelta, timezone
 
 HOST = "http://127.0.0.1:5000"
-MACHINE_ID = str(uuid.uuid4())
 
-def register():
-    payload = {
-        "machine_id": MACHINE_ID,
-        "hostname": f"lab-{random.randint(1000,9999)}",
-        "ip_address": f"192.168.1.{random.randint(10,200)}",
-        "os_info": random.choice(["Linux", "Windows 11", "macOS Ventura"])
-    }
-    r = requests.post(f"{HOST}/register", json=payload)
-    print("Registered:", r.status_code)
+BROWSERS = ["chrome", "firefox", "edge"]
+OS_OPTIONS = ["Windows 10", "Windows 11", "Linux Mint", "Ubuntu 22.04", "macOS Ventura", "macOS Sonoma"]
+SITES = [
+    ("https://facebook.com", "Facebook"),
+    ("https://gmail.com", "Gmail"),
+    ("https://github.com", "GitHub"),
+    ("https://linkedin.com", "LinkedIn"),
+    ("https://youtube.com", "YouTube"),
+    ("https://reddit.com", "Reddit"),
+    ("https://twitter.com", "Twitter"),
+]
 
-def submit_history():
-    payload = {
-        "machine_id": MACHINE_ID,
-        "history": [
-            {"url": "https://example.com", "title": "Example", "visit_time": "2025-04-06T12:00:00", "browser_type": "chrome"},
-            {"url": "https://github.com", "title": "GitHub", "visit_time": "2025-04-06T12:05:00", "browser_type": "firefox"}
-        ]
-    }
-    r = requests.post(f"{HOST}/submit/history", json=payload)
-    print("History:", r.status_code)
+def random_history():
+    now = datetime.now(timezone.utc)
+    return [
+        {
+            "url": url,
+            "title": title,
+            "visit_time": (now - timedelta(minutes=random.randint(1, 500))).isoformat(),
+            "browser_type": random.choice(BROWSERS)
+        } for url, title in random.sample(SITES, k=random.randint(2, 5))
+    ]
 
-def submit_credentials():
-    payload = {
-        "machine_id": MACHINE_ID,
-        "credentials": [
-            {"website": "https://facebook.com", "username": "john.doe", "password": "hunter2", "browser_type": "chrome"},
-            {"website": "https://gmail.com", "username": "jane.doe", "password": "pass1234", "browser_type": "firefox"}
-        ]
+def random_credentials():
+    return [
+        {
+            "website": url,
+            "username": f"user{random.randint(1000,9999)}",
+            "password": f"{random.choice(['hunter2', 'pass123', 'qwerty', 'letmein'])}{random.randint(0,99)}",
+            "browser_type": random.choice(BROWSERS)
+        } for url, _ in random.sample(SITES, k=random.randint(1, 4))
+    ]
+
+def simulate_agent():
+    machine_id = str(uuid.uuid4())
+    hostname = f"lab-{random.randint(1000,9999)}"
+    ip_address = f"192.168.1.{random.randint(10, 200)}"
+    os_info = random.choice(OS_OPTIONS)
+
+    # Register
+    reg_payload = {
+        "machine_id": machine_id,
+        "hostname": hostname,
+        "ip_address": ip_address,
+        "os_info": os_info
     }
-    r = requests.post(f"{HOST}/submit/credentials", json=payload)
-    print("Credentials:", r.status_code)
+    try:
+        r1 = requests.post(f"{HOST}/register", json=reg_payload)
+        print(f"[+] {hostname} registered: {r1.status_code}")
+
+        time.sleep(0.5)
+
+        # Send History
+        hist_payload = {
+            "machine_id": machine_id,
+            "history": random_history()
+        }
+        r2 = requests.post(f"{HOST}/submit/history", json=hist_payload)
+        print(f"[+] {hostname} sent history: {r2.status_code}")
+
+        time.sleep(0.5)
+
+        # Send Credentials
+        cred_payload = {
+            "machine_id": machine_id,
+            "credentials": random_credentials()
+        }
+        r3 = requests.post(f"{HOST}/submit/credentials", json=cred_payload)
+        print(f"[+] {hostname} sent credentials: {r3.status_code}")
+
+    except requests.RequestException as e:
+        print(f"[!] Error with {hostname}: {e}")
 
 if __name__ == "__main__":
-    register()
-    time.sleep(1)
-    submit_history()
-    time.sleep(1)
-    submit_credentials()
+    AGENTS = 5  # Number of mock agents to simulate
+
+    for _ in range(AGENTS):
+        simulate_agent()
+        time.sleep(random.uniform(0.3, 1.0))
