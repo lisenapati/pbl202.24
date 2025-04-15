@@ -17,7 +17,7 @@ class Host(db.Model):
     hostname = db.Column(db.String(64))
     ip_address = db.Column(db.String(64))
     os_info = db.Column(db.String(128))
-    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+    last_seen = db.Column(db.DateTime, default=datetime.now())
 
 class History(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -46,7 +46,7 @@ def register():
     data = request.json
     host = Host.query.filter_by(machine_id=data['machine_id']).first()
     if host:
-        host.last_seen = datetime.utcnow()
+        host.last_seen = datetime.now()
     else:
         host = Host(**data)
         db.session.add(host)
