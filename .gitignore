@@ -1,2 +1,8 @@
 *.db
 host/*.db
+instance/
+instance/**
+host/instance
+host/instance/**
+env/
+env/**
