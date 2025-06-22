@@ -5,6 +5,9 @@
     </head>
     <body>
 <div class="title">
+        AstroWatch
+</div>
+<div class="subtitle">
         BrowseWatch Lab
 </div>
 <div class="loginBox">
@@ -24,7 +27,7 @@
         <input
             id="password"
             class="input"
-            type="text"
+            type="password"
             placeholder="Password"
         >
                 <img src="assets/eye.svg" id="togglePassword" class="eye">
@@ -66,7 +69,7 @@ const usernameInput = document.getElementById('username');
         container.classList.add('fade-out');
 
         setTimeout(() => {
-          window.location.href = '/menu';
+          window.location.href = '/menu.html';
         }, 500);
       } else {
         alert('Username and password can\'t be empty!');
@@ -75,6 +78,15 @@ const usernameInput = document.getElementById('username');
     </script>
 
 <style>
+
+@font-face {
+  font-family: 'Inter';
+  src: url('./assets/fonts/inter/Inter.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
 body {
     background-color: #0f0d25;
     width: 100vw;
@@ -84,24 +96,30 @@ body {
 
 .title {
     color: #ffffff;
-    font-size: 30px;
+    font-size: 35px;
     font-weight: bold;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: Helvetica, sans-serif;
 }
+
+.subtitle {
+    color: #ffffff;
+    font-size: 20px;
+    font-family: Helvetica, sans-serif;
+}
+
 
 .loginheader {
     color: #ffffff;
     font-size: 20px;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: Inter, Helvetica, sans-serif;
 }
 
-.loginBox {
-    display: flex;
-    flex-direction: column;
+.loginBox { display: flex; flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 25px;
-    z-index: 2;
+    position: relative;
+    z-index: 10;
 }
 
 .inputUser {
@@ -126,9 +144,9 @@ body {
   opacity: 0.75;
   padding-left: 20px;
   color: white;
-  font-family: "Poppins-Regular", Helvetica;
+  font-family: Inter, Helvetica;
   font-size: 16px;
-  border: none;
+  font-family: Inter, Helvetica;
   outline: none;
 }
 
@@ -146,36 +164,26 @@ body {
 }
 
 .loginButton {
+  box-shadow: 0 0 0 1px black; /* Acts like a border */
   background-color: #090460;
   border-radius: 50px;
   height: 100%;
   width: 100%;
   color: #ffffff;
-  font-family: "Poppins-Regular", Helvetica;
+  font-family: Inter, Helvetica;
   font-size: 16px;
   border: none;
   cursor: pointer;
   opacity: 0.75;
   transition: 0.3s;
+  position: relative;
+  z-index: 10;
 }
 
 .loginButton:hover {
   opacity: 1;
 }
 
-.loginButton {
-  background-color: #090460;
-  border-radius: 50px;
-  height: 100%;
-  width: 100%;
-  color: #ffffff;
-  font-family: "Poppins-Regular", Helvetica;
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
-  opacity: 0.75;
-  transition: 0.3s;
-}
 
 .eye {
   position: absolute;
@@ -245,6 +253,14 @@ body {
   opacity: 0.75;
 }
 
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.decor {
+  pointer-events: none;
+}
 
 </style>
 
