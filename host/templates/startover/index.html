@@ -1,267 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-    </head>
-    <body>
-<div class="title">
-        AstroWatch
-</div>
-<div class="subtitle">
-        BrowseWatch Lab
-</div>
-<div class="loginBox">
-    <div class="loginheader">
-        Please log in.
-    </div>
-    <div class="inputUser">
-        <input
-            id="username"
-            class="input"
-            type="text"
-            placeholder="Username"
-        >
+<head>
+  <meta charset="UTF-8">
+  <title>Login | AstroWatch</title>
+  <style>
+    @font-face {
+      font-family: 'Inter';
+      src: url('./assets/fonts/inter/Inter.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'Orbitron';
+      src: url('./assets/fonts/orbit/Orbitron.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    body {
+      background-color: #0f0d25;
+      font-family: Inter, Helvetica, Orbitron, sans-serif;
+      color: white;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transform: translateX(0);
+      opacity: 1;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+    }
+
+    body.fade-in {
+      opacity: 1;
+    }
+
+    body.fade-out {
+      opacity: 0;
+    }
+
+    body.slide-in {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    body.slide-out {
+      transform: translateY(70%);
+      opacity: 0;
+    }
+
+
+    .container {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      background-color: #090360;
+      padding: 2rem 3rem;
+      border-radius: 20px;
+      box-shadow: 0 0 0 1px black;
+      opacity: 0.9;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: bold;
+      font-family: Orbitron, sans-serif;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      opacity: 0.8;
+      margin-bottom: 1.5rem;
+    }
+
+    .input {
+      background-color: #0f0d40;
+      border-radius: 12px;
+      border: none;
+      padding: 0.75rem 1rem;
+      width: 300px;
+      color: white;
+      font-size: 14px;
+      outline: none;
+      box-sizing: border-box;
+      height: 44px;
+    }
+
+    .input::placeholder {
+      color: white;
+      opacity: 0.5;
+    }
+
+    .inputWrap {
+      margin-bottom: 0.75rem;
+    }
+
+    .passWrap {
+      position: relative;
+      width: 300px;
+      height: 44px;
+      margin-bottom: 0.75rem;
+    }
+
+    .passWrap .input {
+      padding-right: 2.5rem; /* space for eye icon */
+    }
+
+    .eye {
+      position: absolute;
+      right: 25px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      opacity: 0.7;
+      cursor: pointer;
+    }
+
+    .loginButton {
+      background-color: #0d0577;
+      border: none;
+      border-radius: 12px;
+      padding: 0.5rem 1.5rem;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+
+    .loginButton:hover {
+      opacity: 1;
+    }
+
+    .decor {
+      position: absolute;
+      right: 0;
+      top: -10%;
+      width: 60%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .decor1 {
+      position: absolute;
+      left: 0;
+      top: -10%;
+      width: 60%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      transform: scaleX(-1);
+    }
+
+    .ellipse, .ellipse-2, .ellipse-3, .ellipse-4 {
+      position: absolute;
+      background-color: #0d0588;
+      border-radius: 50%;
+    }
+
+    .ellipse { width: 1200px; height: 1200px; right: -350px; top: -30px; opacity: 0.1; }
+    .ellipse-2 { width: 1000px; height: 1000px; right: -280px; top: 80px; opacity: 0.25; }
+    .ellipse-3 { width: 800px; height: 800px; right: -210px; top: 210px; opacity: 0.5; }
+    .ellipse-4 { width: 600px; height: 600px; right: -150px; top: 350px; opacity: 0.75; }
+
+    .fade-out {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container" id="loginBox">
+  <div class="title">AstroWatch</div>
+  <div class="subtitle">Please Login</div>
+
+    <div class="inputWrap">
+      <input type="text" id="username" class="input" placeholder="Username">
     </div>
 
-    <div class="inputPass">
-        <input
-            id="password"
-            class="input"
-            type="password"
-            placeholder="Password"
-        >
-                <img src="assets/eye.svg" id="togglePassword" class="eye">
+    <div class="passWrap">
+      <input type="password" id="password" class="input" placeholder="Password">
+      <img src="assets/eye.svg" id="togglePassword" class="eye">
     </div>
-    <div class="loginButtonWrap">
-        <button class="loginButton" id="loginButton">Log In</button>
-            </div>
-        </div>
-        <div class="decor">
-            <div class="decor-wrap">
-            <div class="ellipse">            </div>
-            <div class="ellipse-2"></div>
-            <div class="ellipse-3"></div>
-            <div class="ellipse-4"></div>
-            </div>
-        </div>
-    </body>
+
+  <button class="loginButton" id="loginButton">Login</button>
+</div>
+
+<div class="decor">
+  <div class="ellipse"></div>
+  <div class="ellipse-2"></div>
+  <div class="ellipse-3"></div>
+  <div class="ellipse-4"></div>
+</div>
+
+<div class="decor1">
+  <div class="ellipse"></div>
+  <div class="ellipse-2"></div>
+  <div class="ellipse-3"></div>
+  <div class="ellipse-4"></div>
+</div>
 
 <script>
 const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const loginButton = document.getElementById('loginButton');
-    const togglePassword = document.getElementById('togglePassword');
-    const container = document.querySelector('.loginBox');
+const passwordInput = document.getElementById('password');
+const loginButton = document.getElementById('loginButton');
+const togglePassword = document.getElementById('togglePassword');
+const container = document.getElementById('loginBox');
 
-    let showPassword = false;
+let showPassword = false;
 
-    togglePassword.addEventListener('click', () => {
-      showPassword = !showPassword;
-      passwordInput.type = showPassword ? 'text' : 'password';
-      togglePassword.src = showPassword ? 'assets/eye_slash.svg' : 'assets/eye.svg';
-    });
+togglePassword.addEventListener('click', () => {
+  showPassword = !showPassword;
+  passwordInput.type = showPassword ? 'text' : 'password';
+  togglePassword.src = showPassword ? 'assets/eye_slash.svg' : 'assets/eye.svg';
+});
 
-    loginButton.addEventListener('click', () => {
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value.trim();
+loginButton.addEventListener('click', () => {
+  const username = usernameInput.value.trim();
+  const password = passwordInput.value.trim();
 
-      if (username && password) {
-        container.classList.add('fade-out');
+  if (username && password) {
+    document.body.classList.remove('slide-in'); // or fade-in, zoom-in, etc.
+    document.body.classList.add('slide-out');   // or fade-out, zoom-out, etc.
 
-        setTimeout(() => {
-          window.location.href = '/menu.html';
-        }, 500);
-      } else {
-        alert('Username and password can\'t be empty!');
-      }
-    });
-    </script>
+    localStorage.setItem('username', username); // <-- store it
+    setTimeout(() => {
+      window.location.href = '/dashboard.html';
+    }, 300);
+  } else {
+    alert("Username and password can't be empty.");
+  }
+});
+</script>
 
-<style>
-
-@font-face {
-  font-family: 'Inter';
-  src: url('./assets/fonts/inter/Inter.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-}
-
-
-body {
-    background-color: #0f0d25;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-}
-
-.title {
-    color: #ffffff;
-    font-size: 35px;
-    font-weight: bold;
-    font-family: Helvetica, sans-serif;
-}
-
-.subtitle {
-    color: #ffffff;
-    font-size: 20px;
-    font-family: Helvetica, sans-serif;
-}
-
-
-.loginheader {
-    color: #ffffff;
-    font-size: 20px;
-    font-family: Inter, Helvetica, sans-serif;
-}
-
-.loginBox { display: flex; flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 25px;
-    position: relative;
-    z-index: 10;
-}
-
-.inputUser {
-  position: relative;
-  width: 320px;
-  height: 50px;
-  border-radius: 50px;
-}
-
-.inputPass {
-  position: relative;
-  width: 320px;
-  height: 50px;
-  border-radius: 50px;
-}
-
-.input {
-  background-color: #090360;
-  border-radius: 50px;
-  height: 100%;
-  width: 100%;
-  opacity: 0.75;
-  padding-left: 20px;
-  color: white;
-  font-family: Inter, Helvetica;
-  font-size: 16px;
-  font-family: Inter, Helvetica;
-  outline: none;
-}
-
-.input::placeholder {
-  color: #ffffff;
-  opacity: 0.5;
-}
-
-.loginButtonWrap {
-  position: relative;
-  width: 100px;
-  height: 40px;
-  border-radius: 50px;
-  cursor: pointer;
-}
-
-.loginButton {
-  box-shadow: 0 0 0 1px black; /* Acts like a border */
-  background-color: #090460;
-  border-radius: 50px;
-  height: 100%;
-  width: 100%;
-  color: #ffffff;
-  font-family: Inter, Helvetica;
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
-  opacity: 0.75;
-  transition: 0.3s;
-  position: relative;
-  z-index: 10;
-}
-
-.loginButton:hover {
-  opacity: 1;
-}
-
-
-.eye {
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  opacity: 0.75;
-  user-select: none;
-}
-
-.decor {
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 60%;
-  height: 100%;
-  z-index: 1;
-}
-
-.decor-wrap {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.ellipse,
-.ellipse-2,
-.ellipse-3,
-.ellipse-4 {
-  position: absolute;
-  background-color: #0d0588;
-  border-radius: 50%;
-}
-
-.ellipse {
-  width: 1200px;
-  height: 1200px;
-  right: -350px;
-  top: -30px;
-  opacity: 0.1;
-}
-
-.ellipse-2 {
-  width: 1000px;
-  height: 1000px;
-  right: -280px;
-  top: 80px;
-  opacity: 0.25;
-}
-
-.ellipse-3 {
-  width: 800px;
-  height: 800px;
-  right: -210px;
-  top: 210px;
-  opacity: 0.5;
-}
-
-.ellipse-4 {
-  width: 600px;
-  height: 600px;
-  right: -150px;
-  top: 350px;
-  opacity: 0.75;
-}
-
-.fade-out {
-  opacity: 0;
-  transition: opacity 0.5s ease;
-}
-
-.decor {
-  pointer-events: none;
-}
-
-</style>
-
+</body>
 </html>

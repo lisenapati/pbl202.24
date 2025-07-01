@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Clients | AstroWatch</title>
+  <style>
+    @font-face {
+      font-family: 'Inter';
+      src: url('./assets/fonts/inter/Inter.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'Orbitron';
+      src: url('./assets/fonts/orbit/Orbitron.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    body {
+      background-color: #0f0d25;
+      font-family: Inter, Helvetica, sans-serif;
+      color: white;
+      margin: 0;
+      padding: 2rem;
+      transform: translateX(100%);
+      opacity: 0;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+      overflow-x: hidden;
+    }
+
+    body.slide-in {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    body.slide-out {
+      transform: translate3d(-70%, -70%, 0);
+      opacity: 0;
+    }
+
+    .title {
+      font-size: 35px;
+      font-weight: bold;
+      font-family: Orbitron;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      margin-bottom: 2rem;
+      opacity: 0.8;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #0f103a;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .table th, .table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+
+    .table th {
+      background-color: #1c1b88;
+      font-weight: 600;
+    }
+
+    .table tr:nth-child(even) {
+      background-color: #1a1a33;
+    }
+
+    .status-active {
+      color: #00ff7f;
+      font-weight: bold;
+    }
+
+    .status-inactive {
+      color: #ff4c4c;
+      font-weight: bold;
+    }
+
+    .link {
+      color: #57aaff;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .back-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #1c1b88;
+      color: white;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+      opacity: 0.85;
+      transition: opacity 0.3s;
+      z-index: 10;
+    }
+
+    .back-button:hover {
+      opacity: 1;
+    }
+
+    .decor {
+      position: absolute;
+      right: -45%;
+      top: 145%;
+      width: 60%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      transform: scaleX(-1);
+    }
+
+    .ellipse, .ellipse-2, .ellipse-3, .ellipse-4 {
+      position: absolute;
+      background-color: #0d0588;
+      border-radius: 50%;
+    }
+
+    .ellipse { width: 1200px; height: 1200px; right: -350px; top: -30px; opacity: 0.1; }
+    .ellipse-2 { width: 1000px; height: 1000px; right: -280px; top: 80px; opacity: 0.25; }
+    .ellipse-3 { width: 800px; height: 800px; right: -210px; top: 210px; opacity: 0.5; }
+    .ellipse-4 { width: 600px; height: 600px; right: -150px; top: 350px; opacity: 0.75; }
+  </style>
+</head>
+<body>
+
+<div class="title">Clients</div>
+<div class="subtitle">Overview of connected agents</div>
+<button onclick="goTo('dashboard.html')" class="back-button">Back</button>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Hostname</th>
+      <th>IP Address</th>
+      <th>Status</th>
+      <th>Last Seen</th>
+      <th>User Agent</th>
+      <th>Data</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>WIN-92X4</td>
+      <td>192.168.0.105</td>
+      <td class="status-active">Active</td>
+      <td>2025-06-22 23:48</td>
+      <td>Mozilla/5.0 (Windows NT 10.0; Win64; x64)</td>
+      <td><span class="link" onclick="goTo('collected.html?id=WIN-92X4')">View</span></td>
+    </tr>
+    <tr>
+      <td>DEB-NODE-A1</td>
+      <td>192.168.0.110</td>
+      <td class="status-inactive">Inactive</td>
+      <td>2025-06-20 09:27</td>
+      <td>Mozilla/5.0 (X11; Linux x86_64)</td>
+      <td><span class="link" onclick="goTo('collected.html?id=DEB-NODE-A1')">View</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="decor">
+  <div class="ellipse"></div>
+  <div class="ellipse-2"></div>
+  <div class="ellipse-3"></div>
+  <div class="ellipse-4"></div>
+</div>
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    document.body.classList.add("slide-in");
+
+    document.querySelectorAll('a[href], button[onclick^="goTo("], span[onclick^="goTo("]').forEach(el => {
+      el.addEventListener('click', e => {
+        e.preventDefault();
+        const href = el.getAttribute('href') || el.getAttribute('onclick').match(/goTo\(['"](.+?)['"]\)/)[1];
+        goTo(href);
+      });
+    });
+  });
+
+  function goTo(page) {
+    document.body.classList.remove("slide-in");
+    document.body.classList.add("slide-out");
+    setTimeout(() => {
+      window.location.href = page;
+    }, 300);
+  }
+</script>
+
+</body>
+</html>
+
