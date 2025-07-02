@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" >
+  <title>Clients | AstroWatch</title>
+  <style>
+    body {
+      background-color: #0f0d25;
+      font-family: sans-serif;
+      color: white;
+      margin: 0;
+      padding: 2rem;
+      transition: opacity 0.3s ease;
+    }
+
+    .title {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      margin-bottom: 2rem;
+      opacity: 0.7;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #0f103a;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+
+    th {
+      background-color: #1c1b88;
+      font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+      background-color: #1a1a33;
+    }
+
+    .status-active {
+      color: #00ff7f;
+      font-weight: bold;
+    }
+
+    .status-inactive {
+      color: #ff4c4c;
+      font-weight: bold;
+    }
+
+    .view-link {
+      color: #57aaff;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .back-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #1c1b88;
+      color: white;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .decor {
+      position: absolute;
+      right: -45%;
+      top: 145%;
+      width: 60%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+      transform: scaleX(-1);
+    }
+
+    .ellipse, .ellipse-2, .ellipse-3, .ellipse-4 {
+      position: absolute;
+      background-color: #0d0588;
+      border-radius: 50%;
+    }
+
+    .ellipse { width: 1200px; height: 1200px; right: -350px; top: -30px; opacity: 0.1; }
+    .ellipse-2 { width: 1000px; height: 1000px; right: -280px; top: 80px; opacity: 0.25; }
+    .ellipse-3 { width: 800px; height: 800px; right: -210px; top: 210px; opacity: 0.5; }
+    .ellipse-4 { width: 600px; height: 600px; right: -150px; top: 350px; opacity: 0.75; }
+
+  </style>
+</head>
+<body>
+  <div class="title">Clients</div>
+  <div class="subtitle">All agents registered from targets</div>
+  <button class="back-button" onclick="window.location.href='/dashboard'">Back</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Hostname</th>
+        <th>Machine ID</th>
+        <th>IP</th>
+        <th>Status</th>
+        <th>Last Seen</th>
+        <th>OS</th>
+        <th>Datas</th>
+      </tr>
+    </thead>
+    <tbody id="clientTableBody"></tbody>
+  </table>
+
+        <div class="decor">
+  <div class="ellipse"></div>
+  <div class="ellipse-2"></div>
+  <div class="ellipse-3"></div>
+  <div class="ellipse-4"></div>
+        </div>
+  <script>
+    fetch('/api/clients')
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.getElementById('clientTableBody');
+        data.forEach(client => {
+          const row = document.createElement('tr');
+
+          row.innerHTML = `
+            <td>${client.hostname}</td>
+            <td>${client.machine_id}</td>
+            <td>${client.ip_address}</td>
+            <td class="${client.status === 'active' ? 'status-active' : 'status-inactive'}">
+              ${client.status}
+            </td>
+            <td>${client.last_seen}</td>
+            <td>${client.os_info}</td>
+            <td><span class="view-link" onclick="goToClient('${client.machine_id}')">View</span></td>
+          `;
+
+          tbody.appendChild(row);
+        });
+      });
+        function goToClient(machine_id) {
+      window.location.href = `/collected?client=${machine_id}`;
+    }
+  </script>
+
+</body>
+</html>

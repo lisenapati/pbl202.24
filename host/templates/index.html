@@ -1,70 +1,244 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Agent Dashboard</title>
+  <title>Login | AstroWatch</title>
+  <style>
+    @font-face {
+      font-family: 'Inter';
+      src: url('./assets/fonts/inter/Inter.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'Orbitron';
+      src: url('./assets/fonts/orbit/Orbitron.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    body {
+      background-color: #0f0d25;
+      font-family: Inter, Helvetica, Orbitron, sans-serif;
+      color: white;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transform: translateX(0);
+      opacity: 1;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+    }
+
+    body.fade-in {
+      opacity: 1;
+    }
+
+    body.fade-out {
+      opacity: 0;
+    }
+
+    body.slide-in {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    body.slide-out {
+      transform: translateY(70%);
+      opacity: 0;
+    }
+
+
+    .container {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      background-color: #090360;
+      padding: 2rem 3rem;
+      border-radius: 20px;
+      box-shadow: 0 0 0 1px black;
+      opacity: 0.9;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: bold;
+      font-family: Orbitron, sans-serif;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      opacity: 0.8;
+      margin-bottom: 1.5rem;
+    }
+
+    .input {
+      background-color: #0f0d40;
+      border-radius: 12px;
+      border: none;
+      padding: 0.75rem 1rem;
+      width: 300px;
+      color: white;
+      font-size: 14px;
+      outline: none;
+      box-sizing: border-box;
+      height: 44px;
+    }
+
+    .input::placeholder {
+      color: white;
+      opacity: 0.5;
+    }
+
+    .inputWrap {
+      margin-bottom: 0.75rem;
+    }
+
+    .passWrap {
+      position: relative;
+      width: 300px;
+      height: 44px;
+      margin-bottom: 0.75rem;
+    }
+
+    .passWrap .input {
+      padding-right: 2.5rem; /* space for eye icon */
+    }
+
+    .eye {
+      position: absolute;
+      right: 25px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      opacity: 0.7;
+      cursor: pointer;
+    }
+
+    .loginButton {
+      background-color: #0d0577;
+      border: none;
+      border-radius: 12px;
+      padding: 0.5rem 1.5rem;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+
+    .loginButton:hover {
+      opacity: 1;
+    }
+
+    .decor {
+      position: absolute;
+      right: 0;
+      top: -10%;
+      width: 60%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .decor1 {
+      position: absolute;
+      left: 0;
+      top: -10%;
+      width: 60%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      transform: scaleX(-1);
+    }
+
+    .ellipse, .ellipse-2, .ellipse-3, .ellipse-4 {
+      position: absolute;
+      background-color: #0d0588;
+      border-radius: 50%;
+    }
+
+    .ellipse { width: 1200px; height: 1200px; right: -350px; top: -30px; opacity: 0.1; }
+    .ellipse-2 { width: 1000px; height: 1000px; right: -280px; top: 80px; opacity: 0.25; }
+    .ellipse-3 { width: 800px; height: 800px; right: -210px; top: 210px; opacity: 0.5; }
+    .ellipse-4 { width: 600px; height: 600px; right: -150px; top: 350px; opacity: 0.75; }
+
+    .fade-out {
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+  </style>
 </head>
 <body>
-        <div class="title">
-            <h1>Dashboard</h1>
-        </div>
-        <div class="client-box">
-    {% if hosts %}
-      {% for host in hosts %}
-        <div class="card mb-4 shadow-sm">
-          <div class="card-body">
-            <h5 class="card-title">{{ host.hostname }} ({{ host.machine_id }})</h5>
-            <h6 class="card-subtitle text-muted mb-3">{{ host.ip_address }} | {{ host.os_info }}</h6>
 
-            <div class="row">
-              <div class="col-md-6">
-                <h6 class="text-primary">Browser History</h6>
-                {% if host.history %}
-                  <ul class="list-group mb-3">
-                    {% for entry in host.history[:5] %}
-                      <li class="list-group-item small">
-                        <strong>{{ entry.browser_type|capitalize }}</strong> -
-                        <a href="{{ entry.url }}" target="_blank">{{ entry.title or entry.url }}</a><br>
-                        <em>{{ entry.visit_time }}</em>
-                      </li>
-                    {% endfor %}
-                  </ul>
-                {% else %}
-                  <p class="text-muted small">No history found.</p>
-                {% endif %}
-              </div>
+<div class="container" id="loginBox">
+  <div class="title">AstroWatch</div>
+  <div class="subtitle">Please Login</div>
 
-              <div class="col-md-6">
-                <h6 class="text-danger">Credentials</h6>
-                {% if host.credentials %}
-                  <ul class="list-group mb-3">
-                    {% for cred in host.credentials[:5] %}
-                      <li class="list-group-item small">
-                        <strong>{{ cred.browser_type|capitalize }}</strong> - {{ cred.website }}<br>
-                        <code>{{ cred.username }}</code> : <code>{{ cred.password }}</code>
-                      </li>
-                    {% endfor %}
-                  </ul>
-                {% else %}
-                  <p class="text-muted small">No credentials found.</p>
-                {% endif %}
-              </div>
-            </div>
-          </div>
-        </div>
-      {% endfor %}
-    {% else %}
-      <p class="text-muted">No agents connected yet.</p>
-    {% endif %}
-  </div>
+    <div class="inputWrap">
+      <input type="text" id="username" class="input" placeholder="Username">
+    </div>
+
+    <div class="passWrap">
+      <input type="password" id="password" class="input" placeholder="Password">
+      <img src="assets/eye.svg" id="togglePassword" class="eye">
+    </div>
+
+  <button class="loginButton" id="loginButton">Login</button>
+</div>
+
+<div class="decor">
+  <div class="ellipse"></div>
+  <div class="ellipse-2"></div>
+  <div class="ellipse-3"></div>
+  <div class="ellipse-4"></div>
+</div>
+
+<div class="decor1">
+  <div class="ellipse"></div>
+  <div class="ellipse-2"></div>
+  <div class="ellipse-3"></div>
+  <div class="ellipse-4"></div>
+</div>
+
+<script>
+const usernameInput = document.getElementById('username');
+const passwordInput = document.getElementById('password');
+const loginButton = document.getElementById('loginButton');
+const togglePassword = document.getElementById('togglePassword');
+const container = document.getElementById('loginBox');
+
+let showPassword = false;
+
+togglePassword.addEventListener('click', () => {
+  showPassword = !showPassword;
+  passwordInput.type = showPassword ? 'text' : 'password';
+  togglePassword.src = showPassword ? 'assets/eye_slash.svg' : 'assets/eye.svg';
+});
+
+loginButton.addEventListener('click', () => {
+  const username = usernameInput.value.trim();
+  const password = passwordInput.value.trim();
+
+  if (username && password) {
+    document.body.classList.remove('slide-in'); // or fade-in, zoom-in, etc.
+    document.body.classList.add('slide-out');   // or fade-out, zoom-out, etc.
+
+    localStorage.setItem('username', username); // <-- store it
+    setTimeout(() => {
+      window.location.href = '/dashboard';
+    }, 300);
+  } else {
+    alert("Username and password can't be empty.");
+  }
+});
+</script>
+
 </body>
-<style>
-.title h1 {
-    font-family: monospace;
-}
-
-.client-box {
-    background-color: blue;
-}
-</style>
 </html>

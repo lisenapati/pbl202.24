@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>About | AstroWatch</title>
+  <style>
+    @font-face {
+      font-family: 'Inter';
+      src: url('./assets/fonts/inter/Inter.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'Orbitron';
+      src: url('./assets/fonts/orbit/Orbitron.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    body {
+      background-color: #0f0d25;
+      font-family: Inter, Helvetica, sans-serif;
+      color: white;
+      margin: 0;
+      padding: 2rem;
+      overflow: hidden;
+      transform: translateX(100%);
+      opacity: 0;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+    }
+
+    body.slide-in {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    body.slide-out {
+      transform: translateX(-70%);
+      opacity: 0;
+    }
+
+    .title {
+      font-size: 35px;
+      font-weight: bold;
+      font-family: Orbitron;
+    }
+
+    .subtitle {
+      font-size: 20px;
+      margin-bottom: 2rem;
+    }
+
+    .content {
+      max-width: 700px;
+      line-height: 1.6;
+      font-size: 16px;
+      opacity: 0.9;
+    }
+
+    .back-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: #090360;
+      color: white;
+      border: none;
+      padding: 0.5rem 1.2rem;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      opacity: 0.85;
+      transition: opacity 0.3s;
+      z-index: 10;
+    }
+
+    .back-button:hover {
+      opacity: 1;
+      box-shadow: 0 0 0 1px black;
+    }
+
+    .decor {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 60%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1; /* move behind all content */
+      transform: scaleX(-1);
+    }
+
+    .ellipse, .ellipse-2, .ellipse-3, .ellipse-4 {
+      position: absolute;
+      background-color: #0d0588;
+      border-radius: 50%;
+    }
+
+    .ellipse { width: 1200px; height: 1200px; right: -350px; top: -30px; opacity: 0.1; }
+    .ellipse-2 { width: 1000px; height: 1000px; right: -280px; top: 80px; opacity: 0.25; }
+    .ellipse-3 { width: 800px; height: 800px; right: -210px; top: 210px; opacity: 0.5; }
+    .ellipse-4 { width: 600px; height: 600px; right: -150px; top: 350px; opacity: 0.75; }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+      z-index: 5;
+      position: relative;
+    }
+
+    .photo-item {
+      text-align: center;
+    }
+
+    .photo-box {
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      background-color: #1a1649;
+      border-radius: 12px;
+      border: 1px solid #333;
+      box-shadow: 0 0 8px #0003;
+    }
+
+    .caption {
+      margin-top: 0.75rem;
+      font-size: 18px;
+      opacity: 0.8;
+    }
+
+  </style>
+
+</head>
+<body>
+
+<div class="title">AstroWatch</div>
+<div class="subtitle">About Us</div>
+<button onclick="goTo('/dashboard')" class="back-button">Back</button>
+
+<div class="content">
+  <p><strong>BrowseWatch Lab</strong> is a controlled cybersecurity research environment built to simulate and monitor browser-based activity across multiple clients. It supports secure agent deployment, real-time monitoring, and structured data collection from simulated endpoints.</p>
+
+  <p>This project is conducted under institutional authorization and designed for educational and research purposes only. All components, including the dashboard, agents, and data exfiltration logic, operate within sandboxed infrastructure for risk-free experimentation.</p>
+
+  <p>For more information, source code access, or lab configuration, contact the development lead or refer to the internal documentation repository.</p>
+</div>
+
+        <div class="photo-grid">
+  <div class="photo-item">
+    <div class="photo-box"></div>
+                <div class="caption">Arya Senapati Rabbani <br> 4332401024</div>
+  </div>
+  <div class="photo-item">
+    <div class="photo-box"></div>
+    <div class="caption">Christin Agatha Purba<br> 4332401031</div>
+  </div>
+  <div class="photo-item">
+    <div class="photo-box"></div>
+    <div class="caption">Helena Yolanda Amelia<br> 4332401024</div>
+  </div>
+  <div class="photo-item">
+    <div class="photo-box"></div>
+    <div class="caption">Muhammad Rizki Pradana<br> 4332401024</div>
+  </div>
+  <div class="photo-item">
+    <div class="photo-box"></div>
+    <div class="caption">Virrel Juliansyah<br> 4332401024</div>
+  </div>
+  <div class="photo-item">
+    <div class="photo-box"></div>
+    <div class="caption">Bintang Fajar Ahza Trawijaya</div>
+  </div>
+</div>
+
+
+<div class="decor">
+  <div class="ellipse"></div>
+  <div class="ellipse-2"></div>
+  <div class="ellipse-3"></div>
+  <div class="ellipse-4"></div>
+</div>
+
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    document.body.classList.add("slide-in");
+
+    document.querySelectorAll('a[href], button[onclick^="goTo("]').forEach(el => {
+      el.addEventListener('click', e => {
+        e.preventDefault();
+        const href = el.getAttribute('href') || el.getAttribute('onclick').match(/goTo\(['"](.+?)['"]\)/)[1];
+        goTo(href);
+      });
+    });
+  });
+
+  function goTo(page) {
+    document.body.classList.remove('slide-in');
+    document.body.classList.add('slide-out');
+    setTimeout(() => {
+      window.location.href = page;
+    }, 300);
+  }
+</script>
+
+</body>
+</html>
+
