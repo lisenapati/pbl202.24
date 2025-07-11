@@ -38,30 +38,46 @@ def firefox_ts(ts): return datetime.fromtimestamp(ts / 1_000_000).isoformat()
 
 # ========== SQLITE HISTORY ==========
 def extract_history_from_sqlite(path, query, parse_row_fn):
+    import shutil
+
     if not os.path.exists(path):
         print(f"[WARN] File not found: {path}")
         return []
+
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
         temp_path = tmp.name
+
     try:
+        # Copy main db file
         shutil.copy2(path, temp_path)
+
+        # Copy auxiliary files if they exist (important!)
         for ext in ["-wal", "-shm"]:
             src = path + ext
             dst = temp_path + ext
             if os.path.exists(src):
                 shutil.copy2(src, dst)
+
+        # Open read-only via URI (needed for locked or corrupted DBs)
         conn = sqlite3.connect(f"file:{temp_path}?mode=ro", uri=True)
         cursor = conn.cursor()
+
         cursor.execute(query)
         rows = cursor.fetchall()
+        conn.close()
+
         return [parse_row_fn(row) for row in rows]
+
     except Exception as e:
-        print(f"[ERROR] SQLite error: {e}")
+        print(f"[ERROR] Failed to extract from {path}: {e}")
         return []
+
     finally:
         for ext in ["", "-wal", "-shm"]:
-            p = temp_path + ext
-            if os.path.exists(p): os.remove(p)
+            try:
+                os.remove(temp_path + ext)
+            except Exception:
+                pass
 
 def extract_history_generic(name, base_path, query, parser, profile_match="default", file="places.sqlite"):
     if not os.path.exists(base_path):
