@@ -73,6 +73,8 @@ def extract_history_generic(name, base_path, query, parser, profile_match="defau
             return []
         path = os.path.join(base_path, profiles[0])
     full_path = os.path.join(path, file)
+    print(f"[DEBUG] Using profile: {selected}")
+    print(f"[DEBUG] Extracting from: {full_path}")
     return extract_history_from_sqlite(full_path, query, parser)
 
 # ========== HISTORY COLLECTION ==========
@@ -97,6 +99,8 @@ def get_browser_history():
     elif system == "Windows":
         local = os.getenv("LOCALAPPDATA", "")
         roam = os.getenv("APPDATA", "")
+        print(f"[DEBUG] LOCALAPPDATA: {local}")
+        print(f"[DEBUG] APPDATA: {roam}")
 
         # Chrome (Chromium, LOCALAPPDATA)
         results += extract_history_generic(
