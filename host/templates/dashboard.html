@@ -6,14 +6,14 @@
   <style>
     @font-face {
       font-family: 'Inter';
-      src: url('./assets/fonts/inter/Inter.ttf') format('truetype');
+      src: url("{{ url_for('static', filename='assets/fonts/inter/Inter.ttf') }}") format('truetype');
       font-weight: normal;
       font-style: normal;
     }
 
     @font-face {
       font-family: 'Orbitron';
-      src: url('./assets/fonts/orbit/Orbitron.ttf') format('truetype');
+      src: url("{{ url_for('static', filename='assets/fonts/orbit/Orbitron.ttf') }}") format('truetype');
       font-weight: normal;
       font-style: normal;
     }
@@ -25,27 +25,20 @@
       margin: 0;
       padding: 2rem;
       overflow: hidden;
-      opacity: 0;
       transition: transform 0.5s ease, opacity 0.5s ease;
-    }
-
-    body.fade-in {
-      opacity: 1;
-    }
-
-    body.fade-out {
-      opacity: 0;
     }
 
     .title {
       font-size: 35px;
       font-weight: bold;
       font-family: Orbitron;
+      margin-bottom: 0.25rem;
     }
 
     .subtitle {
       font-size: 20px;
       margin-bottom: 2rem;
+      opacity: 0.7;
     }
 
     .card-container {
@@ -83,55 +76,25 @@
 
     .decor {
       position: absolute;
-      right: 45%;
-      top: 0;
-      width: 60%;
+      left: 40%;
+      top: 30%;
+      width: 100%;
       height: 100%;
       pointer-events: none;
       z-index: 0;
       transform: scaleX(-1);
     }
 
-    .ellipse,
-    .ellipse-2,
-    .ellipse-3,
-    .ellipse-4 {
+    .ellipse, .ellipse-2, .ellipse-3, .ellipse-4 {
       position: absolute;
       background-color: #0d0588;
       border-radius: 50%;
     }
 
-    .ellipse {
-      width: 1200px;
-      height: 1200px;
-      right: -350px;
-      top: -30px;
-      opacity: 0.1;
-    }
-
-    .ellipse-2 {
-      width: 1000px;
-      height: 1000px;
-      right: -280px;
-      top: 80px;
-      opacity: 0.25;
-    }
-
-    .ellipse-3 {
-      width: 800px;
-      height: 800px;
-      right: -210px;
-      top: 210px;
-      opacity: 0.5;
-    }
-
-    .ellipse-4 {
-      width: 600px;
-      height: 600px;
-      right: -150px;
-      top: 350px;
-      opacity: 0.75;
-    }
+    .ellipse   { width: 1200px; height: 1200px; left: calc(50% - 600px); top: calc(50% - 600px); opacity: 0.1; }
+    .ellipse-2 { width: 1000px; height: 1000px; left: calc(50% - 500px); top: calc(50% - 500px); opacity: 0.25; }
+    .ellipse-3 { width: 800px;  height: 800px;  left: calc(50% - 400px); top: calc(50% - 400px); opacity: 0.5; }
+    .ellipse-4 { width: 600px;  height: 600px;  left: calc(50% - 300px); top: calc(50% - 300px); opacity: 0.75; }
 
     .about-button {
       position: absolute;
@@ -210,7 +173,7 @@
   </div>
   <div class="card" onclick="goTo('/collected')">
     <div class="card-title">Collected Data</div>
-    <div class="card-desc">Browser logs and credentials</div>
+    <div class="card-desc">Browser logs and credentials from clients</div>
   </div>
 </div>
 
@@ -218,7 +181,7 @@
 
 <div class="user-card">
   <div class="user-label" id="usernameDisplay">User</div>
-  <button onclick="goTo('/')" class="user-logout">Logout</button>
+  <button onclick="goTo('/logout')" class="user-logout">Logout</button>
 </div>
 
 
@@ -234,31 +197,23 @@
   function goTo(page) {
     window.location.href = page;
   }
-  window.addEventListener("DOMContentLoaded", () => {
-    document.body.classList.add("fade-in");
-
-    document.querySelectorAll('a[href], button[onclick^="goTo("]').forEach(el => {
-      el.addEventListener('click', e => {
-        e.preventDefault();
-        const href = el.getAttribute('href') || el.getAttribute('onclick').match(/goTo\(['"](.+?)['"]\)/)[1];
-        document.body.classList.remove('fade-in');
-        document.body.classList.add('fade-out');
-        setTimeout(() => {
-          window.location.href = href;
-        }, 300);
-      });
+window.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll('a[href], button[onclick^="goTo("]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.preventDefault();
+      const href = el.getAttribute('href') || el.getAttribute('onclick').match(/goTo\(['"](.+?)['"]\)/)[1];
+      setTimeout(() => {
+        window.location.href = href;
+      }, 300);
     });
   });
 
-  function goTo(page) {
-    document.body.classList.remove('fade-in');
-    document.body.classList.add('fade-out');
-    setTimeout(() => {
-      window.location.href = page;
-    }, 300);
+  const username = localStorage.getItem('username');
+  const nameSpan = document.getElementById('usernameDisplay');
+  if (nameSpan) {
+    nameSpan.textContent = username || 'Guest';
   }
-  const name = localStorage.getItem("username") || "User";
-document.getElementById("usernameDisplay").textContent = name;
+});
 
 </script>
 

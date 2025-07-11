@@ -6,14 +6,14 @@
   <style>
     @font-face {
       font-family: 'Inter';
-      src: url('./assets/fonts/inter/Inter.ttf') format('truetype');
+      src: url("{{ url_for('static', filename='assets/fonts/inter/Inter.ttf') }}") format('truetype');
       font-weight: normal;
       font-style: normal;
     }
 
     @font-face {
       font-family: 'Orbitron';
-      src: url('./assets/fonts/orbit/Orbitron.ttf') format('truetype');
+      src: url("{{ url_for('static', filename='assets/fonts/orbit/Orbitron.ttf') }}") format('truetype');
       font-weight: normal;
       font-style: normal;
     }
@@ -25,44 +25,34 @@
       margin: 0;
       padding: 2rem;
       overflow: hidden;
-      transform: translateX(100%);
-      opacity: 0;
       transition: transform 0.5s ease, opacity 0.5s ease;
-    }
-
-    body.slide-in {
-      transform: translateX(0);
-      opacity: 1;
-    }
-
-    body.slide-out {
-      transform: translateX(-70%);
-      opacity: 0;
     }
 
     .title {
       font-size: 35px;
       font-weight: bold;
       font-family: Orbitron;
+      margin-bottom: 0.25rem;
     }
 
     .subtitle {
       font-size: 20px;
       margin-bottom: 2rem;
+      opacity: 0.7;
     }
 
     .content {
       max-width: 700px;
       line-height: 1.6;
-      font-size: 16px;
-      opacity: 0.9;
+      font-size: 17px;
+      opacity: 1;
     }
 
     .back-button {
       position: absolute;
       top: 20px;
       right: 20px;
-      background-color: #090360;
+      background-color: #1c1b88;
       color: white;
       border: none;
       padding: 0.5rem 1.2rem;
@@ -97,10 +87,10 @@
       border-radius: 50%;
     }
 
-    .ellipse { width: 1200px; height: 1200px; right: -350px; top: -30px; opacity: 0.1; }
-    .ellipse-2 { width: 1000px; height: 1000px; right: -280px; top: 80px; opacity: 0.25; }
-    .ellipse-3 { width: 800px; height: 800px; right: -210px; top: 210px; opacity: 0.5; }
-    .ellipse-4 { width: 600px; height: 600px; right: -150px; top: 350px; opacity: 0.75; }
+    .ellipse   { width: 1200px; height: 1200px; left: calc(50% - 600px); top: calc(50% - 600px); opacity: 0.1; }
+    .ellipse-2 { width: 1000px; height: 1000px; left: calc(50% - 500px); top: calc(50% - 500px); opacity: 0.25; }
+    .ellipse-3 { width: 800px;  height: 800px;  left: calc(50% - 400px); top: calc(50% - 400px); opacity: 0.5; }
+    .ellipse-4 { width: 600px;  height: 600px;  left: calc(50% - 300px); top: calc(50% - 300px); opacity: 0.75; }
 
     .photo-grid {
       display: grid;
@@ -115,14 +105,25 @@
       text-align: center;
     }
 
-    .photo-box {
-      width: 100%;
-      aspect-ratio: 2 / 3;
-      background-color: #1a1649;
-      border-radius: 12px;
-      border: 1px solid #333;
-      box-shadow: 0 0 8px #0003;
-    }
+.photo-box {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  background-color: #1a1649;
+  border-radius: 12px;
+  border: 1px solid #333;
+  box-shadow: 0 0 8px #0003;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photo-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
 
     .caption {
       margin-top: 0.75rem;
@@ -140,40 +141,51 @@
 <button onclick="goTo('/dashboard')" class="back-button">Back</button>
 
 <div class="content">
-  <p><strong>BrowseWatch Lab</strong> is a controlled cybersecurity research environment built to simulate and monitor browser-based activity across multiple clients. It supports secure agent deployment, real-time monitoring, and structured data collection from simulated endpoints.</p>
+  <p><strong>AstroWatch (BrowseWatch Lab)</strong> is a controlled cybersecurity research environment built to simulate and monitor browser-based activity across multiple clients. It supports secure agent deployment, real-time monitoring, and structured data collection from simulated endpoints.</p>
 
   <p>This project is conducted under institutional authorization and designed for educational and research purposes only. All components, including the dashboard, agents, and data exfiltration logic, operate within sandboxed infrastructure for risk-free experimentation.</p>
 
   <p>For more information, source code access, or lab configuration, contact the development lead or refer to the internal documentation repository.</p>
 </div>
 
-        <div class="photo-grid">
+<div class="photo-grid">
   <div class="photo-item">
-    <div class="photo-box"></div>
-                <div class="caption">Arya Senapati Rabbani <br> 4332401024</div>
+    <div class="photo-box">
+    <img src="{{ url_for('static', filename='assets/pbl/arya.png') }}">
+    </div>
+    <div class="caption">Arya Senapati Rabbani <br> 4332401024</div>
   </div>
   <div class="photo-item">
-    <div class="photo-box"></div>
+    <div class="photo-box">
+    <img src="{{ url_for('static', filename='assets/pbl/tin.png') }}">
+    </div>
     <div class="caption">Christin Agatha Purba<br> 4332401031</div>
   </div>
   <div class="photo-item">
-    <div class="photo-box"></div>
+    <div class="photo-box">
+    <img src="{{ url_for('static', filename='assets/pbl/len.png') }}">
+    </div>
     <div class="caption">Helena Yolanda Amelia<br> 4332401024</div>
   </div>
   <div class="photo-item">
-    <div class="photo-box"></div>
+    <div class="photo-box">
+        <img src="{{ url_for('static', filename='assets/pbl/miki.png') }}">
+    </div>
     <div class="caption">Muhammad Rizki Pradana<br> 4332401024</div>
   </div>
   <div class="photo-item">
-    <div class="photo-box"></div>
+    <div class="photo-box">
+    <img src="{{ url_for('static', filename='assets/pbl/rel.png') }}">
+    </div>
     <div class="caption">Virrel Juliansyah<br> 4332401024</div>
   </div>
   <div class="photo-item">
-    <div class="photo-box"></div>
+    <div class="photo-box">
+    <img src="{{ url_for('static', filename='assets/pbl/bintang1.png') }}">
+    </div>
     <div class="caption">Bintang Fajar Ahza Trawijaya</div>
   </div>
 </div>
-
 
 <div class="decor">
   <div class="ellipse"></div>
@@ -183,25 +195,22 @@
 </div>
 
 <script>
+  function goTo(page) {
+    window.location.href = page;
+  }
   window.addEventListener("DOMContentLoaded", () => {
-    document.body.classList.add("slide-in");
 
     document.querySelectorAll('a[href], button[onclick^="goTo("]').forEach(el => {
       el.addEventListener('click', e => {
         e.preventDefault();
         const href = el.getAttribute('href') || el.getAttribute('onclick').match(/goTo\(['"](.+?)['"]\)/)[1];
-        goTo(href);
+        setTimeout(() => {
+          window.location.href = href;
+        }, 300);
       });
     });
   });
 
-  function goTo(page) {
-    document.body.classList.remove('slide-in');
-    document.body.classList.add('slide-out');
-    setTimeout(() => {
-      window.location.href = page;
-    }, 300);
-  }
 </script>
 
 </body>

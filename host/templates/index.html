@@ -6,14 +6,14 @@
   <style>
     @font-face {
       font-family: 'Inter';
-      src: url('./assets/fonts/inter/Inter.ttf') format('truetype');
+      src: url("{{ url_for('static', filename='assets/fonts/inter/Inter.ttf') }}") format('truetype');
       font-weight: normal;
       font-style: normal;
     }
 
     @font-face {
       font-family: 'Orbitron';
-      src: url('./assets/fonts/orbit/Orbitron.ttf') format('truetype');
+      src: url("{{ url_for('static', filename='assets/fonts/orbit/Orbitron.ttf') }}") format('truetype');
       font-weight: normal;
       font-style: normal;
     }
@@ -23,38 +23,17 @@
       font-family: Inter, Helvetica, Orbitron, sans-serif;
       color: white;
       margin: 0;
+      padding: 0;
       height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       overflow: hidden;
-      transform: translateX(0);
-      opacity: 1;
-      transition: transform 0.5s ease, opacity 0.5s ease;
-    }
-
-    body.fade-in {
       opacity: 1;
     }
 
-    body.fade-out {
-      opacity: 0;
-    }
-
-    body.slide-in {
-      transform: translateX(0);
-      opacity: 1;
-    }
-
-    body.slide-out {
-      transform: translateY(70%);
-      opacity: 0;
-    }
-
-
-    .container {
-      position: relative;
-      z-index: 10;
+    .log-container {
+      position: absolute;
+      top: 30%;
+      right: 40%;
+      left: 40%;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -64,12 +43,48 @@
       border-radius: 20px;
       box-shadow: 0 0 0 1px black;
       opacity: 0.9;
+      z-index: 1;
     }
+
+    .decor {
+      position: absolute;
+      right: 0;
+      left: 40%;
+      top: 0%;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .decor1 {
+      position: absolute;
+      right: 0;
+      left: -40%;
+      top: 0%;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      transform: scaleX(-1);
+    }
+
+    .ellipse, .ellipse-2, .ellipse-3, .ellipse-4 {
+      position: absolute;
+      background-color: #0d0588;
+      border-radius: 50%;
+    }
+
+    .ellipse   { width: 1200px; height: 1200px; left: calc(50% - 600px); top: calc(50% - 600px); opacity: 0.1; }
+    .ellipse-2 { width: 1000px; height: 1000px; left: calc(50% - 500px); top: calc(50% - 500px); opacity: 0.25; }
+    .ellipse-3 { width: 800px;  height: 800px;  left: calc(50% - 400px); top: calc(50% - 400px); opacity: 0.5; }
+    .ellipse-4 { width: 600px;  height: 600px;  left: calc(50% - 300px); top: calc(50% - 300px); opacity: 0.75; }
+
 
     .title {
       font-size: 28px;
       font-weight: bold;
-      font-family: Orbitron, sans-serif;
+      font-family: Orbitron;
     }
 
     .subtitle {
@@ -108,7 +123,7 @@
     }
 
     .passWrap .input {
-      padding-right: 2.5rem; /* space for eye icon */
+      padding-right: 2.5rem;
     }
 
     .eye {
@@ -137,61 +152,24 @@
       opacity: 1;
     }
 
-    .decor {
-      position: absolute;
-      right: 0;
-      top: -10%;
-      width: 60%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .decor1 {
-      position: absolute;
-      left: 0;
-      top: -10%;
-      width: 60%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 0;
-      transform: scaleX(-1);
-    }
-
-    .ellipse, .ellipse-2, .ellipse-3, .ellipse-4 {
-      position: absolute;
-      background-color: #0d0588;
-      border-radius: 50%;
-    }
-
-    .ellipse { width: 1200px; height: 1200px; right: -350px; top: -30px; opacity: 0.1; }
-    .ellipse-2 { width: 1000px; height: 1000px; right: -280px; top: 80px; opacity: 0.25; }
-    .ellipse-3 { width: 800px; height: 800px; right: -210px; top: 210px; opacity: 0.5; }
-    .ellipse-4 { width: 600px; height: 600px; right: -150px; top: 350px; opacity: 0.75; }
-
-    .fade-out {
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
   </style>
 </head>
 <body>
 
-<div class="container" id="loginBox">
+<form method="POST" class="log-container" id="loginBox">
   <div class="title">AstroWatch</div>
   <div class="subtitle">Please Login</div>
 
-    <div class="inputWrap">
-      <input type="text" id="username" class="input" placeholder="Username">
-    </div>
+  <div class="inputWrap">
+    <input type="text" name="username" class="input" placeholder="Username" required>
+  </div>
 
-    <div class="passWrap">
-      <input type="password" id="password" class="input" placeholder="Password">
-      <img src="assets/eye.svg" id="togglePassword" class="eye">
-    </div>
-
-  <button class="loginButton" id="loginButton">Login</button>
-</div>
+  <div class="passWrap">
+    <input type="password" name="password" class="input" placeholder="Password" required>
+    <img src="{{ url_for('static', filename='assets/eye.svg') }}" id="togglePassword" class="eye">
+  </div>
+  <button type="submit" class="loginButton">Login</button>
+</form>
 
 <div class="decor">
   <div class="ellipse"></div>
@@ -213,32 +191,36 @@ const passwordInput = document.getElementById('password');
 const loginButton = document.getElementById('loginButton');
 const togglePassword = document.getElementById('togglePassword');
 const container = document.getElementById('loginBox');
+const eyeIcon = "{{ url_for('static', filename='assets/eye.svg') }}";
+const eyeSlashIcon = "{{ url_for('static', filename='assets/eye_slash.svg') }}";
+
+const params = new URLSearchParams(window.location.search);
+if (params.has("error")) {
+  alert(params.get("error"));
+}
 
 let showPassword = false;
 
 togglePassword.addEventListener('click', () => {
   showPassword = !showPassword;
   passwordInput.type = showPassword ? 'text' : 'password';
-  togglePassword.src = showPassword ? 'assets/eye_slash.svg' : 'assets/eye.svg';
+  togglePassword.src = showPassword ? eyeSlashIcon : eyeIcon;
 });
 
-loginButton.addEventListener('click', () => {
-  const username = usernameInput.value.trim();
-  const password = passwordInput.value.trim();
+document.getElementById('loginBox').addEventListener('submit', (e) => {
+  const username = document.querySelector('[name="username"]').value.trim();
+  const password = document.querySelector('[name="password"]').value.trim();
 
-  if (username && password) {
-    document.body.classList.remove('slide-in'); // or fade-in, zoom-in, etc.
-    document.body.classList.add('slide-out');   // or fade-out, zoom-out, etc.
-
-    localStorage.setItem('username', username); // <-- store it
-    setTimeout(() => {
-      window.location.href = '/dashboard';
-    }, 300);
-  } else {
+  if (!username || !password) {
+    e.preventDefault();
     alert("Username and password can't be empty.");
+    return;
   }
+
+  localStorage.setItem('username', username);
 });
 </script>
+
 
 </body>
 </html>

