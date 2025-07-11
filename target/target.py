@@ -63,18 +63,25 @@ def extract_history_from_sqlite(path, query, parse_row_fn):
             p = temp_path + ext
             if os.path.exists(p): os.remove(p)
 
-def extract_history_generic(name, base_path, query, parser, profile_match="default", file="History"):
+def extract_history_generic(name, base_path, query, parser, profile_match="default", file="places.sqlite"):
     if not os.path.exists(base_path):
+        print(f"[WARN] Base path missing: {base_path}")
         return []
-    path = base_path
-    if os.path.isdir(base_path):
-        profiles = [d for d in os.listdir(base_path) if profile_match in d]
-        if not profiles:
-            return []
-        path = os.path.join(base_path, profiles[0])
-    full_path = os.path.join(path, file)
+
+    print(f"[DEBUG] Scanning profiles in: {base_path}")
+    profiles = [d for d in os.listdir(base_path) if os.path.isdir(os.path.join(base_path, d))]
+    print(f"[DEBUG] Profiles found: {profiles}")
+
+    if not profiles:
+        print(f"[WARN] No profiles found for {name}")
+        return []
+
+    selected = next((p for p in profiles if profile_match in p), profiles[0])
     print(f"[DEBUG] Using profile: {selected}")
+
+    full_path = os.path.join(base_path, selected, file)
     print(f"[DEBUG] Extracting from: {full_path}")
+
     return extract_history_from_sqlite(full_path, query, parser)
 
 # ========== HISTORY COLLECTION ==========
