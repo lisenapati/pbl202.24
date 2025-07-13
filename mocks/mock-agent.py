@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 HOST = "http://127.0.0.1:5000"
 
 BROWSERS = ["chrome", "firefox", "edge"]
-OS_OPTIONS = ["Windows 10", "Windows 11", "Linux Mint", "Ubuntu 22.04", "macOS Ventura", "macOS Sonoma"]
+OS_OPTIONS = ["Windows 10", "Windows 11", "Linux Mint", "Ubuntu 22.04", "Debian 12", "Debian 11"]
 SITES = [
     ("https://facebook.com", "Facebook"),
     ("https://gmail.com", "Gmail"),
@@ -34,14 +34,14 @@ def random_credentials():
         {
             "website": url,
             "username": f"user{random.randint(1000,9999)}",
-            "password": f"{random.choice(['hunter2', 'pass123', 'qwerty', 'letmein'])}{random.randint(0,99)}",
+            "password": f"{random.choice(['hunter2', 'pass123', 'qwertyuiopasdfghjkl;', 'satusampaidelapan'])}{random.randint(0,99)}",
             "browser_type": random.choice(BROWSERS)
         } for url, _ in random.sample(SITES, k=random.randint(1, 4))
     ]
 
 def simulate_agent():
     machine_id = str(uuid.uuid4())
-    hostname = f"lab-{random.randint(1000,9999)}"
+    hostname = f"client-{random.randint(1000,9999)}"
     ip_address = f"192.168.1.{random.randint(10, 200)}"
     os_info = random.choice(OS_OPTIONS)
 
@@ -80,7 +80,7 @@ def simulate_agent():
         print(f"[!] Error with {hostname}: {e}")
 
 if __name__ == "__main__":
-    AGENTS = 5  # Number of mock agents to simulate
+    AGENTS = 3
 
     for _ in range(AGENTS):
         simulate_agent()

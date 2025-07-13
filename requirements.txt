@@ -1,13 +1,13 @@
-Flask>=2.3
-flask-swagger-ui>=4.11
-Flask-SQLAlchemy>=3.1
-requests>=2.31
-browser-cookie3>=0.19
-keyring>=24.0
-cryptography>=41.0
-pycryptodome>=3.20
-pycryptodomex>=3.20
-psutil>=5.9
-colorama>=0.4
-pywin32>=306; sys_platform == "win32"
-scapy>=2.5
+Flask
+flask-swagger-ui
+Flask-SQLAlchemy
+requests
+browser-cookie3
+keyring
+cryptography
+pycryptodome
+pycryptodomex
+psutil
+colorama
+pywin32; sys_platform == "win32"
+pyinstaller

